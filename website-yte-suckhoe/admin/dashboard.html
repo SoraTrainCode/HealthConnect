@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tổng quan, Trang quản trị</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="admin-shell">
+  <aside class="admin-sidebar" id="adminSidebar"></aside>
+  <div class="admin-main">
+    <div class="section-title"><h2 class="h4">Tổng quan hệ thống</h2></div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="num" id="statArticles">--</div><div class="label">Bài viết</div></div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="num">5</div><div class="label">Danh mục</div></div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="num">86</div><div class="label">Người dùng đăng ký (demo)</div></div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="num" id="statViews">--</div><div class="label">Lượt xem tích lũy</div></div>
+      </div>
+    </div>
+
+    <div class="section-title"><h2 class="h5">Bài viết xem nhiều nhất</h2></div>
+    <table class="table table-admin">
+      <thead><tr><th>Tiêu đề</th><th>Danh mục</th><th>Ngày đăng</th><th>Lượt xem</th></tr></thead>
+      <tbody id="topArticles"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>window.__BASE__ = "../";</script>
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script>
+  renderAdminShell("dashboard");
+
+  document.getElementById("statArticles").textContent = ARTICLES.length;
+  document.getElementById("statViews").textContent = ARTICLES.reduce((s, a) => s + a.views, 0);
+
+  const top = [...ARTICLES].sort((a, b) => b.views - a.views).slice(0, 5);
+  document.getElementById("topArticles").innerHTML = top
+    .map(
+      (a) => `<tr><td>${a.title}</td><td>${catName(a.categoryId)}</td><td>${formatDate(a.date)}</td><td>${a.views}</td></tr>`
+    )
+    .join("");
+</script>
+</body>
+</html>

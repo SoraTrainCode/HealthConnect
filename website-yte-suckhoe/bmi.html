@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Công cụ tính BMI, Sổ Tay Sức Khỏe</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <section class="hero py-4">
+    <div class="container py-3">
+      <h1 class="h2 font-display mb-2">Công cụ tính chỉ số BMI</h1>
+      <p class="text-muted mb-0">BMI (Body Mass Index) là chỉ số tham khảo nhanh về tình trạng cân nặng so với chiều cao.</p>
+    </div>
+  </section>
+
+  <section class="container py-5">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="bmi-panel">
+          <form id="bmiForm">
+            <div class="mb-3">
+              <label class="form-label">Chiều cao (cm)</label>
+              <input type="number" id="heightInput" class="form-control" placeholder="Ví dụ: 165" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cân nặng (kg)</label>
+              <input type="number" id="weightInput" class="form-control" placeholder="Ví dụ: 58" required>
+            </div>
+            <button type="submit" class="btn btn-brand w-100">Tính BMI</button>
+          </form>
+          <p id="bmiGuestNote" class="small text-muted mt-3 mb-0">
+            Bạn đang xem ở chế độ khách, kết quả không được lưu lại. <a href="dang-nhap.html">Đăng nhập</a> để lưu lịch sử đo.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div id="bmiResultBox" class="bmi-panel h-100" hidden>
+          <p class="cat-tag" style="color:#2F6B4F">KẾT QUẢ</p>
+          <div class="d-flex align-items-end gap-3 mb-2">
+            <span class="bmi-result-value" id="bmiValue">--</span>
+            <span class="fw-semibold fs-5" id="bmiLabel">--</span>
+          </div>
+          <div class="bmi-gauge">
+            <div class="marker" id="gaugeMarker" style="left:0%"></div>
+          </div>
+          <div class="bmi-scale-labels">
+            <span>15</span><span>18.5</span><span>23</span><span>27.5</span><span>32</span>
+          </div>
+          <p class="small text-muted mt-3 mb-0">Thang phân loại tham khảo dành cho người trưởng thành châu Á. Đây không phải chẩn đoán y khoa.</p>
+        </div>
+        <div class="bmi-panel h-100 d-flex align-items-center justify-content-center text-muted" id="bmiPlaceholder">
+          Nhập chiều cao và cân nặng bên trái để xem kết quả tại đây.
+        </div>
+      </div>
+    </div>
+
+    <div id="bmiHistorySection" class="mt-5" style="display:none">
+      <div class="section-title"><h2>Lịch sử đo của bạn</h2></div>
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <canvas id="bmiTrendChart" width="420" height="220" class="w-100"></canvas>
+          <p class="small text-muted text-center mt-2">Xu hướng BMI theo 10 lần đo gần nhất</p>
+        </div>
+        <div class="col-lg-7">
+          <table class="table bmi-history-table">
+            <thead><tr><th>Ngày đo</th><th>Chiều cao</th><th>Cân nặng</th><th>BMI</th><th>Phân loại</th></tr></thead>
+            <tbody id="bmiHistoryBody"></tbody>
+          </table>
+          <p id="bmiHistoryEmpty" class="text-muted small">Chưa có lịch sử đo nào. Hãy tính BMI ở trên để lưu lại.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/chatbot.js"></script>
+<script src="assets/js/bmi.js"></script>
+<script>
+  renderHeader("bmi");
+  renderFooter();
+  initBmiPage();
+
+  document.getElementById("bmiForm").addEventListener("submit", () => {
+    document.getElementById("bmiPlaceholder").style.display = "none";
+  });
+</script>
+</body>
+</html>

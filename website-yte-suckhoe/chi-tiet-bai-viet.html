@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chi tiết bài viết, Sổ Tay Sức Khỏe</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<main class="container py-5" id="articleWrap">
+  <!-- Nội dung render bằng JS bên dưới -->
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/chatbot.js"></script>
+<script>
+  renderHeader("news");
+  renderFooter();
+
+  const id = new URLSearchParams(window.location.search).get("id");
+  const article = getArticleById(id);
+  const wrap = document.getElementById("articleWrap");
+
+  if (!article) {
+    wrap.innerHTML = `<div class="text-center py-5">
+      <h2>Không tìm thấy bài viết</h2>
+      <a href="tin-tuc.html" class="btn btn-brand mt-3">Quay lại danh sách tin tức</a>
+    </div>`;
+  } else {
+    document.title = article.title + ", Sổ Tay Sức Khỏe";
+    const related = getRelatedArticles(article);
+
+    wrap.innerHTML = `
+      <nav class="small text-muted mb-3">
+        <a href="tin-tuc.html">Tin tức y tế</a> / <span>${catName(article.categoryId)}</span>
+      </nav>
+      <div class="row">
+        <div class="col-lg-8">
+          <p class="cat-tag" style="color:${catColor(article.categoryId)}">${catName(article.categoryId)}</p>
+          <h1 class="font-display mb-3" style="font-size:2.1rem">${article.title}</h1>
+          <div class="d-flex gap-3 text-muted small mb-4">
+            <span>${formatDate(article.date)}</span><span>${article.views} lượt xem</span>
+          </div>
+          <div style="font-size:1.03rem; line-height:1.75; color:var(--ink-soft)">${article.content}</div>
+
+          <div class="mt-5 p-3" style="background:var(--accent-tint); border-radius:var(--radius-sm)">
+            <strong>Lưu ý:</strong> Nội dung trên chỉ mang tính tham khảo, không thay thế chẩn đoán y khoa. Hãy đến cơ sở y tế uy tín nếu bạn có triệu chứng bất thường.
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="bmi-panel mb-4">
+            <h3 class="h6 mb-3">Bài viết liên quan</h3>
+            ${
+              related.length
+                ? related
+                    .map(
+                      (r) => `<a href="chi-tiet-bai-viet.html?id=${r.id}" class="d-block mb-3 text-decoration-none">
+                  <div class="small text-muted">${catName(r.categoryId)}</div>
+                  <div style="color:var(--ink); font-weight:600">${r.title}</div>
+                </a>`
+                    )
+                    .join("")
+                : `<p class="text-muted small mb-0">Chưa có bài viết liên quan.</p>`
+            }
+          </div>
+          <div class="bmi-panel">
+            <h3 class="h6 mb-2">Tự kiểm tra chỉ số cơ thể</h3>
+            <p class="small text-muted">Đo BMI và lưu lại lịch sử theo dõi thể trạng của bạn.</p>
+            <a href="bmi.html" class="btn btn-accent w-100">Đến công cụ BMI</a>
+          </div>
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>

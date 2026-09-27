@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quản lý người dùng, Trang quản trị</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="admin-shell">
+  <aside class="admin-sidebar" id="adminSidebar"></aside>
+  <div class="admin-main">
+    <div class="section-title"><h2 class="h4">Quản lý người dùng</h2></div>
+
+    <input type="search" id="userSearch" class="form-control mb-3" style="max-width:320px" placeholder="Tìm theo tên hoặc email...">
+
+    <table class="table table-admin align-middle">
+      <thead><tr><th>Họ tên</th><th>Email</th><th>Ngày đăng ký</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody id="userTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>window.__BASE__ = "../";</script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script>
+  renderAdminShell("users");
+
+  // Dữ liệu người dùng mẫu, thay bằng SELECT * FROM users khi nối back-end
+  const MOCK_USERS = [
+    { name: "Trần Thị B", email: "tranthib@gmail.com", date: "2026-08-01", status: "active" },
+    { name: "Lê Văn C", email: "levanc@gmail.com", date: "2026-08-04", status: "active" },
+    { name: "Phạm Thị D", email: "phamthid@gmail.com", date: "2026-08-10", status: "locked" },
+    { name: "Nguyễn Văn E", email: "nguyenvane@gmail.com", date: "2026-09-01", status: "active" },
+  ];
+
+  function renderUsers() {
+    const kw = document.getElementById("userSearch").value.trim().toLowerCase();
+    const list = MOCK_USERS.filter((u) => u.name.toLowerCase().includes(kw) || u.email.toLowerCase().includes(kw));
+    document.getElementById("userTable").innerHTML = list.map((u) => `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${new Date(u.date).toLocaleDateString("vi-VN")}</td>
+        <td><span class="badge ${u.status === "active" ? "badge-status-published" : "badge-status-locked"} px-2 py-1">
+          ${u.status === "active" ? "Hoạt động" : "Đã khóa"}</span></td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-brand" onclick="alert('Sẽ gọi PUT /api/users.php để ${u.status === "active" ? "khóa" : "mở khóa"} tài khoản.')">
+            ${u.status === "active" ? "Khóa" : "Mở khóa"}
+          </button>
+        </td>
+      </tr>`).join("");
+  }
+
+  document.getElementById("userSearch").addEventListener("input", renderUsers);
+  renderUsers();
+</script>
+</body>
+</html>

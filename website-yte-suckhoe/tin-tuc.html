@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tin tức y tế, Sổ Tay Sức Khỏe</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<main>
+  <section class="hero py-4">
+    <div class="container py-3">
+      <h1 class="h2 font-display mb-2">Tin tức y tế</h1>
+      <p class="text-muted mb-0">Kiến thức dinh dưỡng, vận động và mẹo chăm sóc sức khỏe được cập nhật thường xuyên.</p>
+    </div>
+  </section>
+
+  <section class="container py-4">
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-md-6">
+        <input type="search" id="searchInput" class="form-control" placeholder="Tìm bài viết theo tiêu đề...">
+      </div>
+      <div class="col-md-6">
+        <div id="catFilters" class="d-flex flex-wrap gap-2 justify-content-md-end"></div>
+      </div>
+    </div>
+
+    <div id="articleList" class="row g-4"></div>
+    <p id="noResult" class="text-muted text-center py-5" style="display:none">Không tìm thấy bài viết phù hợp. Thử từ khóa khác nhé.</p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/chatbot.js"></script>
+<script>
+  renderHeader("news");
+  renderFooter();
+
+  const params = new URLSearchParams(window.location.search);
+  let activeCat = params.get("cat") || "all";
+
+  function renderCatFilters() {
+    const all = [{ slug: "all", name: "Tất cả", color: "#2F6B4F" }, ...CATEGORIES];
+    document.getElementById("catFilters").innerHTML = all
+      .map(
+        (c) =>
+          `<button type="button" class="cat-pill ${activeCat === c.slug ? "active" : ""}" data-slug="${c.slug}">${c.name}</button>`
+      )
+      .join("");
+    document.querySelectorAll("#catFilters .cat-pill").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCat = btn.dataset.slug;
+        renderCatFilters();
+        renderList();
+      });
+    });
+  }
+
+  function renderList() {
+    const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+    let list = ARTICLES.filter((a) => {
+      const cat = CATEGORIES.find((c) => c.id === a.categoryId);
+      const matchCat = activeCat === "all" || (cat && cat.slug === activeCat);
+      const matchKeyword = a.title.toLowerCase().includes(keyword) || a.summary.toLowerCase().includes(keyword);
+      return matchCat && matchKeyword;
+    });
+
+    document.getElementById("noResult").style.display = list.length === 0 ? "block" : "none";
+    document.getElementById("articleList").innerHTML = list
+      .map(
+        (a) => `
+      <div class="col-md-6 col-lg-4">
+        <a href="chi-tiet-bai-viet.html?id=${a.id}" class="text-decoration-none">
+          <div class="article-card" style="--cat-color:${catColor(a.categoryId)}">
+            <div style="font-size:1.8rem">${a.thumb}</div>
+            <p class="cat-tag">${catName(a.categoryId)}</p>
+            <h3>${a.title}</h3>
+            <p>${a.summary}</p>
+            <div class="meta"><span>${formatDate(a.date)}</span><span>${a.views} lượt xem</span></div>
+          </div>
+        </a>
+      </div>`
+      )
+      .join("");
+  }
+
+  document.getElementById("searchInput").addEventListener("input", renderList);
+  renderCatFilters();
+  renderList();
+</script>
+</body>
+</html>
