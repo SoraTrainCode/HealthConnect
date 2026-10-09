@@ -1,0 +1,4 @@
+website-yte-suckhoe/config.local.php
+website-yte-suckhoe/uploads/*
+!website-yte-suckhoe/uploads/.htaccess
+*.log
