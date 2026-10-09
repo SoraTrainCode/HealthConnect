@@ -1,3 +1,5 @@
+> Ghi chú bản PHP: tài liệu bên dưới là đặc tả gốc. Trạng thái triển khai hiện tại và cách chạy xem `../HUONG_DAN.md`; kết quả kiểm tra xem `KIEM_THU.md`. Các mô tả “đang làm frontend/mock” bên dưới phản ánh giai đoạn trước.
+
 # ĐỀ TÀI CHI TIẾT: Website cung cấp thông tin y tế và hỗ trợ theo dõi sức khỏe cá nhân
 
 ## 1. Bối cảnh & mục tiêu cụ thể

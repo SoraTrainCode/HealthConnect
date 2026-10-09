@@ -1,0 +1,5 @@
+Options -Indexes
+DirectoryIndex index.php
+<FilesMatch "^(config\..*\.php|HUONG_DAN\.md)$">
+Require all denied
+</FilesMatch>

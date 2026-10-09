@@ -79,3 +79,18 @@ CREATE TABLE chat_messages (
   PRIMARY KEY (id), KEY idx_chat_messages_history (session_id, created_at),
   CONSTRAINT fk_chat_messages_session FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+-- PHP extensions
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+ attempt_key CHAR(64) PRIMARY KEY, failures INT NOT NULL DEFAULT 0,
+ last_attempt DATETIME NOT NULL, locked_until DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS password_resets (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL, token_hash CHAR(64) NOT NULL UNIQUE,
+ expires_at DATETIME NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
