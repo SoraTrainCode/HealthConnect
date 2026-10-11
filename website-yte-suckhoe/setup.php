@@ -5,6 +5,7 @@ if (query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn()) {
     exit("Đã có admin. Trang cài đặt đã khóa.");
 }
 $error = null;
+die("DANG CHAY DUNG FILE SETUP MOI");
 if (post()) {
     check_csrf();
     try {
@@ -28,7 +29,14 @@ if (post()) {
             "INSERT INTO users(full_name,email,password_hash,role) VALUES(?,?,?,'admin')",
             [$name, $email, password_hash($pw, PASSWORD_DEFAULT)],
         );
-        $uid = (int) db()->lastInsertId();
+        $uid = (int) query(
+            "SELECT id FROM users WHERE email = ?",
+            [$email]
+        )->fetchColumn();
+
+        if ($uid <= 0) {
+            throw new RuntimeException("Không tìm thấy ID của admin vừa tạo.");
+        }
         if (
             isset($_POST["seed"]) &&
             (int) query("SELECT COUNT(*) FROM articles")->fetchColumn() === 0
@@ -67,14 +75,11 @@ if (post()) {
         db()->commit();
         flash("Đã tạo admin và dữ liệu khởi tạo. Hãy đăng nhập.");
         redirect("dang-nhap.php");
-    } catch (RuntimeException $ex) {
+    }catch (Throwable $ex) {
         if (db()->inTransaction()) {
             db()->rollBack();
         }
-        $error =
-            $ex instanceof PDOException
-                ? "Không tạo được admin. Email có thể đã tồn tại."
-                : $ex->getMessage();
+        $error = "Lỗi: " . $ex->getMessage();
     }
 }
 head("Khởi tạo HealthConnect");
