@@ -44,8 +44,10 @@ function db(): PDO
                 PDO::ATTR_EMULATE_PREPARES => false,
             ],
         );
+        // Chỉ chạy 1 lần khi mở kết nối. Nếu chạy mỗi lần gọi db() thì
+        // lastInsertId() sau INSERT sẽ bị reset về 0.
+        $pdo->exec("SET time_zone = '+07:00'");
     }
-    $pdo->exec("SET time_zone = '+07:00'");
     return $pdo;
 }
 function query(string $sql, array $params = []): PDOStatement
