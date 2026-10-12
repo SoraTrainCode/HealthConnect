@@ -1,13 +1,42 @@
 <?php define("ADMIN_PAGE", true);
 require dirname(__DIR__) . "/includes/bootstrap.php";
 require dirname(__DIR__) . "/includes/layout.php";
+require dirname(__DIR__) . "/includes/admin_ui.php";
 $admin = require_admin();
 $error = null;
 if (post()) {
     check_csrf();
     try {
         $id = (int) ($_POST["id"] ?? 0);
-        if (($_POST["action"] ?? "") === "delete") {
+        $act = (string) ($_POST["act"] ?? "");
+        if ($act !== "") {
+            // Thao tác nhanh trên từng dòng: "toggle:ID" hoặc "delete:ID"; hàng loạt: "bulk"
+            if ($act === "bulk") {
+                $ids = array_values(array_filter(array_map("intval", (array) ($_POST["ids"] ?? []))));
+                $bulk = (string) ($_POST["bulk_action"] ?? "");
+                if (!$ids || !in_array($bulk, ["publish", "draft", "delete"], true)) {
+                    throw new RuntimeException("Chọn ít nhất một bài và một thao tác.");
+                }
+            } else {
+                [$one, $oneId] = array_pad(explode(":", $act, 2), 2, "0");
+                $ids = [(int) $oneId];
+                $bulk = $one === "toggle" ? "toggle" : ($one === "delete" ? "delete" : "");
+                if (!$ids[0] || $bulk === "") {
+                    throw new RuntimeException("Thao tác không hợp lệ.");
+                }
+            }
+            $in = implode(",", array_fill(0, count($ids), "?"));
+            if ($bulk === "delete") {
+                query("DELETE FROM articles WHERE id IN ($in)", $ids);
+            } elseif ($bulk === "toggle") {
+                query("UPDATE articles SET status=IF(status='published','draft','published') WHERE id IN ($in)", $ids);
+            } else {
+                $to = $bulk === "publish" ? "published" : "draft";
+                query("UPDATE articles SET status=? WHERE id IN ($in)", array_merge([$to], $ids));
+            }
+            flash("Đã cập nhật " . count($ids) . " bài viết.");
+            redirect("bai-viet.php" . (!empty($_POST["back"]) ? "?" . $_POST["back"] : ""));
+        } elseif (($_POST["action"] ?? "") === "delete") {
             query("DELETE FROM articles WHERE id=?", [$id]);
         } else {
             $title = field("title", 255);
@@ -129,22 +158,108 @@ $edit =
         (int) ($_GET["edit"] ?? 0),
     ])->fetch() ?:
     [];
+// --- Bộ lọc, tìm kiếm, phân trang ---
+$q = mb_substr(trim((string) ($_GET["q"] ?? "")), 0, 120);
+$fs = in_array($_GET["status"] ?? "", ["draft", "published"], true) ? $_GET["status"] : "";
+$fc = (int) ($_GET["cat"] ?? 0);
+$where = ["1=1"];
+$params = [];
+if ($q !== "") {
+    $where[] = "(a.title LIKE ? OR a.slug LIKE ?)";
+    $params[] = "%" . $q . "%";
+    $params[] = "%" . $q . "%";
+}
+if ($fs !== "") {
+    $where[] = "a.status=?";
+    $params[] = $fs;
+}
+if ($fc) {
+    $where[] = "a.category_id=?";
+    $params[] = $fc;
+}
+$whereSql = implode(" AND ", $where);
+$perPage = 15;
+$totalRows = (int) query("SELECT COUNT(*) FROM articles a WHERE $whereSql", $params)->fetchColumn();
+$pages = max(1, (int) ceil($totalRows / $perPage));
+$page = min($pages, max(1, (int) ($_GET["page"] ?? 1)));
+$offset = ($page - 1) * $perPage;
+$rows = query(
+    "SELECT a.*,c.name category_name FROM articles a JOIN categories c ON c.id=a.category_id WHERE $whereSql ORDER BY a.id DESC LIMIT $perPage OFFSET $offset",
+    $params,
+)->fetchAll();
+$allCats = query("SELECT id,name FROM categories ORDER BY name")->fetchAll();
+$back = http_build_query(array_filter(["q" => $q, "status" => $fs, "cat" => $fc ?: "", "page" => $page > 1 ? $page : ""]));
+
 head("Quản lý bài viết");
+admin_bar("bai-viet.php");
 notice($error);
-?><div class="table-responsive"><table class="table"><thead><tr><th>Tiêu đề</th><th>Danh mục</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody><?php foreach (
-    query(
-        "SELECT a.*,c.name category_name FROM articles a JOIN categories c ON c.id=a.category_id ORDER BY a.id DESC",
-    )
-    as $a
-): ?><tr><td><?php echo e($a["title"]); ?></td><td><?php echo e(
-    $a["category_name"],
-); ?></td><td><?php echo $a["status"] === "published"
-    ? "Đã đăng"
-    : "Bản nháp"; ?></td><td><a href="?edit=<?php echo $a[
-    "id"
-]; ?>#editor">Sửa</a><form method="post" class="d-inline" onsubmit="return confirm('Xóa bài viết này?')"><?php echo csrf(); ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?php echo $a[
-    "id"
-]; ?>"><button class="btn btn-sm btn-outline-danger">Xóa</button></form></td></tr><?php endforeach; ?></tbody></table></div><form method="post" enctype="multipart/form-data" id="editor" class="bmi-panel mt-4"><?php echo csrf(); ?><input type="hidden" name="id" value="<?php echo e(
+?>
+<form method="get" class="adm-filter">
+  <input name="q" value="<?php echo e($q); ?>" class="form-control" placeholder="Tìm tiêu đề hoặc slug">
+  <select name="status" class="form-select">
+    <option value="">Mọi trạng thái</option>
+    <option value="published" <?php echo $fs === "published" ? "selected" : ""; ?>>Đã đăng</option>
+    <option value="draft" <?php echo $fs === "draft" ? "selected" : ""; ?>>Bản nháp</option>
+  </select>
+  <select name="cat" class="form-select">
+    <option value="0">Mọi danh mục</option>
+    <?php foreach ($allCats as $c): ?>
+      <option value="<?php echo (int) $c["id"]; ?>" <?php echo $fc === (int) $c["id"] ? "selected" : ""; ?>><?php echo e($c["name"]); ?></option>
+    <?php endforeach; ?>
+  </select>
+  <button class="btn btn-brand">Lọc</button>
+  <a class="btn btn-outline-secondary" href="bai-viet.php">Xóa lọc</a>
+  <a class="btn btn-outline-brand ms-auto" href="#editor">Viết bài mới</a>
+</form>
+
+<form method="post" id="bulkForm">
+<?php echo csrf(); ?>
+<input type="hidden" name="back" value="<?php echo e($back); ?>">
+<div class="table-responsive"><table class="table align-middle">
+<thead><tr>
+  <th style="width:32px"><input type="checkbox" id="checkAll" aria-label="Chọn tất cả"></th>
+  <th>Tiêu đề</th><th>Danh mục</th><th>Trạng thái</th><th class="text-end">Lượt xem</th><th>Thao tác</th>
+</tr></thead><tbody>
+<?php foreach ($rows as $a): ?>
+<tr>
+  <td><input type="checkbox" name="ids[]" value="<?php echo (int) $a["id"]; ?>" class="rowCheck" aria-label="Chọn bài"></td>
+  <td><?php echo e($a["title"]); ?><div class="small text-muted"><?php echo e($a["slug"]); ?></div></td>
+  <td><?php echo e($a["category_name"]); ?></td>
+  <td><?php echo $a["status"] === "published"
+      ? '<span class="adm-badge ok">Đã đăng</span>'
+      : '<span class="adm-badge draft">Bản nháp</span>'; ?></td>
+  <td class="text-end"><?php echo number_format((int) ($a["view_count"] ?? 0)); ?></td>
+  <td class="text-nowrap">
+    <a href="?edit=<?php echo (int) $a["id"]; ?>#editor">Sửa</a>
+    <button name="act" value="toggle:<?php echo (int) $a["id"]; ?>" class="btn btn-sm btn-outline-brand">
+      <?php echo $a["status"] === "published" ? "Gỡ xuống" : "Đăng"; ?></button>
+    <button name="act" value="delete:<?php echo (int) $a["id"]; ?>" class="btn btn-sm btn-outline-danger"
+      onclick="return confirm('Xóa bài viết này?')">Xóa</button>
+  </td>
+</tr>
+<?php endforeach; ?>
+<?php if (!$rows): ?><tr><td colspan="6" class="adm-empty">Không có bài viết nào khớp bộ lọc.</td></tr><?php endif; ?>
+</tbody></table></div>
+
+<div class="adm-bulk">
+  <span class="text-muted small"><?php echo $totalRows; ?> bài</span>
+  <select name="bulk_action" class="form-select" style="width:auto">
+    <option value="">Thao tác với bài đã chọn</option>
+    <option value="publish">Đăng</option>
+    <option value="draft">Chuyển về bản nháp</option>
+    <option value="delete">Xóa</option>
+  </select>
+  <button name="act" value="bulk" class="btn btn-sm btn-brand"
+    onclick="if(this.form.bulk_action.value==='delete')return confirm('Xóa các bài đã chọn?')">Áp dụng</button>
+</div>
+</form>
+<?php admin_pager($page, $pages); ?>
+<script>
+document.getElementById('checkAll').addEventListener('change',function(){
+  document.querySelectorAll('.rowCheck').forEach(c=>c.checked=this.checked);
+});
+</script>
+<form method="post" enctype="multipart/form-data" id="editor" class="bmi-panel mt-4"><?php echo csrf(); ?><input type="hidden" name="id" value="<?php echo e(
     $edit["id"] ?? 0,
 ); ?>"><h2 class="h5"><?php echo $edit ? "Sửa" : "Thêm"; ?> bài viết</h2><?php
  input("title", "Tiêu đề", $edit["title"] ?? "", "text", true);

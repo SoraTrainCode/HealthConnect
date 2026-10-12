@@ -1,6 +1,7 @@
 <?php define("ADMIN_PAGE", true);
 require dirname(__DIR__) . "/includes/bootstrap.php";
 require dirname(__DIR__) . "/includes/layout.php";
+require dirname(__DIR__) . "/includes/admin_ui.php";
 require_admin();
 $error = null;
 if (post()) {
@@ -54,6 +55,7 @@ $edit =
     ])->fetch() ?:
     [];
 head("Quản lý danh mục");
+admin_bar("danh-muc.php");
 notice($error);
 ?><div class="row"><div class="col-md-7"><table class="table"><thead><tr><th>Tên</th><th>Số bài</th><th>Thao tác</th></tr></thead><tbody><?php foreach (
     query(
