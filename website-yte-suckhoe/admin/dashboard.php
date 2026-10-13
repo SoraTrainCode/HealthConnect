@@ -25,6 +25,11 @@ $stats = [
     ],
     ["Lần đo BMI", count_of("SELECT COUNT(*) FROM bmi_logs"), ""],
     ["Phiên chat", count_of("SELECT COUNT(*) FROM chat_sessions"), ""],
+    [
+        "Lịch khám hôm nay",
+        count_of("SELECT COUNT(*) FROM appointments WHERE appt_date=CURDATE() AND status<>'cancelled'"),
+        count_of("SELECT COUNT(*) FROM appointments WHERE appt_date=CURDATE() AND status='pending'") . " chờ xác nhận",
+    ],
 ];
 
 $totalViews = count_of("SELECT COALESCE(SUM(view_count),0) FROM articles");

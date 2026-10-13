@@ -8,6 +8,7 @@ function admin_bar(string $active): void
 {
     $items = [
         "dashboard.php" => "Tổng quan",
+        "lich-kham.php" => "Lịch khám",
         "bai-viet.php" => "Bài viết",
         "danh-muc.php" => "Danh mục",
         "nguoi-dung.php" => "Người dùng",
