@@ -36,7 +36,7 @@ function cards(array $articles): void
     foreach (
         $articles
         as $a
-    ): ?><div class="col-md-4"><article class="article-card p-4 h-100"><?php if (
+    ): $isExternal = !empty($a["source_url"]); ?><div class="col-md-4"><article class="article-card p-4 h-100"><?php if (
     !empty($a["thumbnail_url"])
 ): ?><img src="<?php echo e(
     str_starts_with($a["thumbnail_url"], "uploads/") ? url($a["thumbnail_url"]) : $a["thumbnail_url"],
@@ -44,7 +44,7 @@ function cards(array $articles): void
     $a["category_name"] ?? "",
 ); ?> · <?php echo e(
      date("d/m/Y", strtotime($a["created_at"])),
- ); ?></small><h2 class="h5 mt-2"><a href="<?php echo url(
+ ); ?><?php if ($isExternal): ?> · <?php echo e($a["source_name"] ?? "Nguồn tin"); ?><?php endif; ?></small><h2 class="h5 mt-2"><a <?php echo $isExternal ? 'target="_blank" rel="noopener noreferrer"' : ""; ?> href="<?php echo $isExternal ? e($a["source_url"]) : url(
     "chi-tiet-bai-viet.php?id=" . (int) $a["id"],
 ); ?>"><?php echo e($a["title"]); ?></a></h2><p><?php echo e(
     $a["summary"],

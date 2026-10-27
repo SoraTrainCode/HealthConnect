@@ -1,9 +1,13 @@
 <?php require __DIR__ . "/includes/bootstrap.php";
 require __DIR__ . "/includes/layout.php";
 require __DIR__ . "/includes/appointments.php";
-$articles = query(
+$localArticles = query(
     "SELECT a.*,c.name category_name FROM articles a JOIN categories c ON c.id=a.category_id WHERE a.status='published' ORDER BY a.created_at DESC,a.id DESC LIMIT 6",
 )->fetchAll();
+require __DIR__ . "/includes/news_sync.php";
+$articles = array_merge($localArticles, array_slice(news_listing_items(), 0, 6));
+usort($articles, static fn($a, $b) => strcmp($b["created_at"], $a["created_at"]));
+$articles = array_slice($articles, 0, 6);
 head("Chăm sóc sức khỏe từ những điều nhỏ nhất");
 ?><section class="hero p-4 mb-4"><p class="lead">Tra cứu kiến thức sức khỏe, theo dõi BMI và trò chuyện với trợ lý sức khỏe.</p><a class="btn btn-brand" href="bmi.php">Đo BMI ngay</a> <a class="btn btn-brand" href="dat-lich.php">Đặt lịch khám</a> <a class="btn btn-outline-brand" href="tin-tuc.php">Khám phá bài viết</a></section><?php
 $me = user();

@@ -14,4 +14,9 @@ return [
     // Dùng để tạo link email đặt lại mật khẩu; sửa nếu thư mục/cổng khác.
     "app_url" => "http://localhost:8080/HealthConnect/website-yte-suckhoe",
     "mail_from" => "no-reply@example.com",
+    // Khoảng làm mới cache RSS (30-60 phút), tính bằng giây.
+    "news_cache_ttl" => 3600,
+    "news_sources" => [
+        ["name" => "CDC Online Newsroom", "url" => "https://tools.cdc.gov/api/v2/resources/media/132608.rss"],
+    ],
 ];
