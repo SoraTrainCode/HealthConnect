@@ -15,3 +15,9 @@ CREATE TABLE IF NOT EXISTS appointments (
   KEY idx_slot (appt_date, appt_time, status),
   KEY idx_user (user_id, appt_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Khóa chung cho các giao dịch đặt/hủy/cập nhật lịch; không chứa dữ liệu cá nhân.
+CREATE TABLE IF NOT EXISTS appointment_mutex (
+  id TINYINT UNSIGNED PRIMARY KEY
+) ENGINE=InnoDB;
+INSERT IGNORE INTO appointment_mutex(id) VALUES (1);

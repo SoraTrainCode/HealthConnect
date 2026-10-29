@@ -7,13 +7,22 @@ return [
     "db_user" => "root",
     "db_pass" => "",
     // Chọn chuỗi bí mật riêng (ít nhất 16 ký tự), dùng một lần ở setup.php.
-    "setup_key" => "HC_Setup_2026_Binh_9xK2",
+    "setup_key" => "",
     // URL Ollama trên MÁY CHẠY PHP, không phải máy khách.
     "ollama_url" => "http://127.0.0.1:11434/api/chat",
     "ollama_model" => "qwen2.5:3b",
     // Dùng để tạo link email đặt lại mật khẩu; sửa nếu thư mục/cổng khác.
-    "app_url" => "http://localhost:8080/HealthConnect/website-yte-suckhoe",
+    "app_url" => "http://localhost/HealthConnect/website-yte-suckhoe",
     "mail_from" => "no-reply@example.com",
+    // mail = PHP mail(); smtp = PHPMailer (đã kèm trong source).
+    "mail_transport" => "mail",
+    "smtp_host" => "",
+    "smtp_port" => "587",
+    "smtp_username" => "",
+    "smtp_password" => "",
+    "smtp_security" => "tls", // tls (STARTTLS) hoặc ssl (SMTPS).
+    "smtp_auth" => "1",
+
     // Khoảng làm mới cache RSS (30-60 phút), tính bằng giây.
     "news_cache_ttl" => 3600,
     "news_sources" => [

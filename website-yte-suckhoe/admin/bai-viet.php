@@ -63,8 +63,10 @@ if (post()) {
             ) {
                 throw new RuntimeException("Danh mục không tồn tại.");
             }
+            $localImage = (bool) preg_match('~^uploads/[a-f0-9]{32}\.(?:jpg|png|webp)$~', $thumb)
+                && is_file(dirname(__DIR__) . '/' . $thumb);
             if (
-                $thumb !== "" &&
+                $thumb !== "" && !$localImage &&
                 (!filter_var($thumb, FILTER_VALIDATE_URL) ||
                     !in_array(
                         parse_url($thumb, PHP_URL_SCHEME),
@@ -287,7 +289,7 @@ $c["id"]
     ? "selected"
     : ""; ?>>Đã đăng</option></select><label>Tóm tắt</label><textarea class="form-control" name="summary" rows="3"><?php echo e(
     $edit["summary"] ?? "",
-); ?></textarea><label>Nội dung bài viết</label><div class="d-flex gap-2 mb-2" id="formatTools"><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="bold">Đậm</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="italic">Nghiêng</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="insertUnorderedList">Danh sách</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="formatBlock" data-value="h2">Tiêu đề</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="formatBlock" data-value="p">Đoạn văn</button></div><div id="richContent" class="form-control" contenteditable="true" role="textbox" aria-label="Nội dung bài viết" style="min-height:260px"><?php echo safe_content(
+); ?></textarea><label>Nội dung bài viết</label><div class="d-flex flex-wrap gap-2 mb-2" id="formatTools"><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="bold">Đậm</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="italic">Nghiêng</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="insertUnorderedList">Danh sách</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="formatBlock" data-value="h2">Tiêu đề</button><button type="button" class="btn btn-sm btn-outline-brand" data-cmd="formatBlock" data-value="p">Đoạn văn</button></div><div id="richContent" class="form-control" contenteditable="true" role="textbox" aria-label="Nội dung bài viết" style="min-height:260px"><?php echo safe_content(
     $edit["content"] ?? "",
 ); ?></div><textarea name="content" id="rawContent" class="form-control" rows="12" required><?php echo e(
     $edit["content"] ?? "",
@@ -296,4 +298,4 @@ $c["id"]
     "URL ảnh mới (để trống để giữ ảnh cũ)",
     "",
     "url",
-); ?><label>Hoặc tải ảnh (JPEG/PNG/WebP, tối đa 2 MB)</label><input class="form-control" type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp"><button class="btn btn-brand">Lưu bài viết</button> <a href="bai-viet.php">Tạo mới</a></form><?php foot(); ?>
+); ?><?php if(!empty($edit['thumbnail_url'])): ?><div class="mb-3"><p class="small text-muted">Ảnh hiện tại</p><img src="<?php echo e(str_starts_with($edit['thumbnail_url'],'uploads/')?url($edit['thumbnail_url']):$edit['thumbnail_url']); ?>" alt="Ảnh bài viết hiện tại" style="max-width:160px;max-height:120px;object-fit:cover;border-radius:8px"></div><?php endif; ?><label>Hoặc tải ảnh (JPEG/PNG/WebP, tối đa 2 MB)</label><input class="form-control" type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp"><button class="btn btn-brand">Lưu bài viết</button> <a href="bai-viet.php">Tạo mới</a></form><?php foot(); ?>

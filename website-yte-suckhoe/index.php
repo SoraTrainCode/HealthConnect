@@ -1,28 +1,10 @@
-<?php require __DIR__ . "/includes/bootstrap.php";
-require __DIR__ . "/includes/layout.php";
-require __DIR__ . "/includes/appointments.php";
-$localArticles = query(
-    "SELECT a.*,c.name category_name FROM articles a JOIN categories c ON c.id=a.category_id WHERE a.status='published' ORDER BY a.created_at DESC,a.id DESC LIMIT 6",
-)->fetchAll();
-require __DIR__ . "/includes/news_sync.php";
-$articles = array_merge($localArticles, array_slice(news_listing_items(), 0, 6));
-usort($articles, static fn($a, $b) => strcmp($b["created_at"], $a["created_at"]));
-$articles = array_slice($articles, 0, 6);
-head("Chăm sóc sức khỏe từ những điều nhỏ nhất");
-?><section class="hero p-4 mb-4"><p class="lead">Tra cứu kiến thức sức khỏe, theo dõi BMI và trò chuyện với trợ lý sức khỏe.</p><a class="btn btn-brand" href="bmi.php">Đo BMI ngay</a> <a class="btn btn-brand" href="dat-lich.php">Đặt lịch khám</a> <a class="btn btn-outline-brand" href="tin-tuc.php">Khám phá bài viết</a></section><?php
-$me = user();
-$upcoming = [];
-if ($me) {
-    try {
-        $upcoming = query(
-            "SELECT * FROM appointments WHERE user_id=? AND appt_date>=CURDATE() AND status IN ('pending','confirmed') ORDER BY appt_date, appt_time LIMIT 3",
-            [$me["id"]],
-        )->fetchAll();
-    } catch (Throwable $ex) {
-        error_log((string) $ex); // chưa tạo bảng appointments thì bỏ qua, không làm hỏng trang chủ
-    }
-}
-if ($upcoming): ?><section class="mb-4"><h2 class="h5 mb-3">Lịch khám sắp tới của bạn</h2><div class="list-group"><?php foreach ($upcoming as $a): ?><a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="dat-lich.php"><span><strong><?php echo e(date("d/m/Y", strtotime($a["appt_date"]))); ?> lúc <?php echo e(substr($a["appt_time"], 0, 5)); ?></strong> · <?php echo e($a["specialty"]); ?></span><?php echo appt_badge($a["status"]); ?></a><?php endforeach; ?></div></section><?php endif; ?><h2 class="h4 mb-3">Bài viết mới nhất</h2><?php
-cards($articles);
-foot();
- ?>
+<?php
+require __DIR__.'/includes/bootstrap.php';require __DIR__.'/includes/layout.php';require __DIR__.'/includes/news_sync.php';
+$local=query("SELECT a.*,c.name category_name FROM articles a JOIN categories c ON c.id=a.category_id WHERE a.status='published' ORDER BY a.created_at DESC,a.id DESC LIMIT 6")->fetchAll();
+$articles=array_merge($local,array_slice(news_listing_items(),0,6));usort($articles,fn($a,$b)=>strcmp($b['created_at'],$a['created_at']));$articles=array_slice($articles,0,6);
+head('Sức khỏe tốt bắt đầu từ sự chủ động');
+?>
+<section class="hero-final"><div><span class="eyebrow">SỔ TAY SỨC KHỎE CỦA BẠN</span><h2>Một nơi để hiểu mình.<br>Mỗi ngày khỏe hơn.</h2><p class="mt-3">Ghi lại chỉ số, theo dõi thói quen và sắp xếp lịch khám — ngay trong một không gian riêng của bạn.</p><div class="d-flex flex-wrap gap-2 mt-4"><a class="btn btn-brand" href="suc-khoe.php">Mở sổ sức khỏe →</a><a class="btn btn-outline-brand" href="bac-si.php">Tìm bác sĩ</a></div></div><div class="hero-art" aria-hidden="true"><div><small>GHI NHẬN & THEO DÕI</small><strong>Những thay đổi nhỏ, theo thời gian.</strong><svg viewBox="0 0 240 65" style="width:100%;height:70px"><path d="M0 50 L40 43 L80 46 L120 23 L160 29 L200 14 L240 18" fill="none" stroke="#3a7955" stroke-width="3"/></svg></div><div><small>CHỦ ĐỘNG CHĂM SÓC</small><strong>Lịch hẹn trong tầm tay</strong><span>Chọn bác sĩ · Chọn giờ · Theo dõi trạng thái</span></div></div></section>
+<div class="feature-grid"><a class="feature-card" href="bmi.php"><span class="number">01 / THEO DÕI</span><h3>Cân nặng & BMI</h3><p>Lưu các lần đo, nhìn lại xu hướng và đặt mục tiêu cá nhân.</p></a><a class="feature-card" href="suc-khoe.php"><span class="number">02 / THÓI QUEN</span><h3>Nhật ký mỗi ngày</h3><p>Ghi giấc ngủ, lượng nước và thời gian vận động của bạn.</p></a><a class="feature-card" href="dat-lich.php"><span class="number">03 / KẾT NỐI</span><h3>Lịch khám chủ động</h3><p>Tìm giờ trống, gửi yêu cầu và theo dõi lịch hẹn.</p></a></div>
+<div class="section-heading"><div><span class="eyebrow">ĐỌC & TÌM HIỂU</span><h2 class="h4">Góc kiến thức sức khỏe</h2></div><a href="tin-tuc.php">Xem tất cả →</a></div><?php cards($articles); ?>
+<section class="welcome-strip mt-5"><div><h2 class="h4">Sổ sức khỏe theo bạn mỗi ngày</h2><p>Giao diện dành cho điện thoại. Cài vào màn hình chính để truy cập thuận tiện hơn.</p></div><a class="btn btn-outline-brand" href="huong-dan-app.php">Cách cài ứng dụng</a></section><?php foot(); ?>

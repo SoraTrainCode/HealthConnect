@@ -2,6 +2,7 @@
 require dirname(__DIR__) . "/includes/bootstrap.php";
 require dirname(__DIR__) . "/includes/layout.php";
 require dirname(__DIR__) . "/includes/admin_ui.php";
+require dirname(__DIR__).'/includes/appointments.php';
 $admin = require_admin();
 $error = null;
 
@@ -14,7 +15,11 @@ if (post()) {
         $error = "Không thao tác với tài khoản quản trị tại trang này.";
     } else {
         try {
+            appt_begin();
             if ($do === "delete") {
+                if (query('SELECT id FROM appointments WHERE user_id=? LIMIT 1',[$id])->fetchColumn()) {
+                    throw new RuntimeException('Tài khoản còn lịch khám. Hãy khóa tài khoản để giữ lịch sử và dữ liệu lịch hẹn.');
+                }
                 query("DELETE FROM users WHERE id=? AND role='user'", [$id]);
                 flash("Đã xóa tài khoản.");
             } else {
@@ -24,9 +29,11 @@ if (post()) {
                 );
                 flash("Đã thay đổi trạng thái tài khoản.");
             }
+            db()->commit();
             redirect("nguoi-dung.php" . (!empty($_POST["back"]) ? "?" . $_POST["back"] : ""));
-        } catch (PDOException $ex) {
-            $error = "Không xóa được: tài khoản còn dữ liệu liên quan. Hãy khóa tài khoản thay vì xóa.";
+        } catch (Throwable $ex) {
+            if(db()->inTransaction()) db()->rollBack();
+            $error = $ex instanceof PDOException ? "Không xóa được: tài khoản còn dữ liệu liên quan. Hãy khóa tài khoản thay vì xóa." : $ex->getMessage();
         }
     }
 }

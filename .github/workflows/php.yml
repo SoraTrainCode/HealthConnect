@@ -1,0 +1,38 @@
+name: PHP checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test-only-password
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -ptest-only-password"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    strategy:
+      matrix:
+        php: ['8.1', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php }}'
+          extensions: pdo_mysql, mbstring, dom, curl, fileinfo, simplexml, openssl
+      - run: find website-yte-suckhoe tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: php tests/appointments.php
+      - run: php tests/news.php
+      - run: php tests/database.php
+        env:
+          HC_TEST_DB_PASS: test-only-password
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests
+      - run: python tests/http_smoke.py
+        env:
+          HC_TEST_DB_PASS: test-only-password

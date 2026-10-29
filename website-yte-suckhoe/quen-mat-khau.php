@@ -1,10 +1,13 @@
 <?php require __DIR__ . "/includes/bootstrap.php";
 require __DIR__ . "/includes/layout.php";
+require __DIR__ . "/includes/mailer.php";
 $message = null;
 $error = null;
 if (post()) {
     check_csrf();
     try {
+        if (time() - (int)($_SESSION['reset_request_at']??0) < 30) throw new RuntimeException('Vui lòng đợi 30 giây trước khi gửi lại.');
+        $_SESSION['reset_request_at']=time();
         $email = mb_strtolower(field("email", 190));
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException("Email không hợp lệ.");
@@ -30,13 +33,9 @@ if (post()) {
                     rtrim(cfg("app_url"), "/") .
                     "/dat-lai-mat-khau.php?token=" .
                     $raw;
-                $sent = @mail(
-                    $email,
-                    "HealthConnect - Dat lai mat khau",
-                    "Mo lien ket sau trong 15 phut:\n" . $link,
-                    ["From" => cfg("mail_from")],
-                );
+                $sent = hc_send_mail($email, "HealthConnect - Đặt lại mật khẩu", "Mở liên kết sau trong 15 phút:\n" . $link);
                 if (!$sent) {
+                    query("DELETE FROM password_resets WHERE token_hash=?", [hash('sha256',$raw)]);
                     error_log(
                         "HealthConnect: mail transport unavailable. Configure PHP SMTP/sendmail.",
                     );

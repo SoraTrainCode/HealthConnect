@@ -1,119 +1,54 @@
-# HealthConnect --- PHP + MySQL
+# HealthConnect — Sổ tay sức khỏe & đặt lịch khám
 
-HealthConnect là website thông tin y tế và theo dõi sức khỏe cá nhân,
-được chuyển từ giao diện tĩnh của repository
-[SoraTrainCode/HealthConnect](https://github.com/SoraTrainCode/HealthConnect)
-sang xử lý nghiệp vụ bằng PHP và MySQL.
+Đồ án web dùng **PHP 8.1+, MySQL/MariaDB, HTML, CSS và JavaScript**. Giao diện responsive và PWA có thể cài lên màn hình chính khi truy cập qua HTTPS. Không cần Node, React hoặc framework backend để chạy website.
 
-Dự án vẫn sử dụng HTML, CSS, JavaScript và Bootstrap cho giao diện, biểu
-đồ, trình soạn thảo và chatbot. PHP xử lý nghiệp vụ phía máy chủ; đây
-không phải website chỉ sử dụng riêng PHP.
+## Có gì trong bản này?
 
-## Chức năng chính
+- Đăng ký, đăng nhập theo cổng người dùng/admin, hồ sơ, đổi mật khẩu, reset qua email.
+- Sổ sức khỏe riêng: BMI, biểu đồ cân nặng, mục tiêu, nhật ký ngủ/nước/vận động, xuất CSV.
+- Bác sĩ/chuyên khoa, lịch tuần/ngày nghỉ, đặt lịch theo giờ trống, nhật ký trạng thái, phiếu hẹn và lịch điện thoại.
+- Admin quản lý bác sĩ, lịch khám, bài viết, danh mục, tài khoản và thống kê.
+- Bài viết nội bộ cùng tin RSS của nhóm; chatbot Ollama và lịch sử hội thoại.
+- Giao diện điện thoại, thanh điều hướng dưới, cài PWA, trang ngoại tuyến không lưu dữ liệu riêng tư.
 
--   Tin tức y tế: danh sách bài viết, tìm kiếm, lọc danh mục, phân
-    trang, xem chi tiết và lượt xem.
--   Tài khoản: đăng ký, đăng nhập, đăng xuất, chỉnh sửa hồ sơ, đổi mật
-    khẩu và quy trình quên mật khẩu.
--   Công cụ BMI: tính BMI, lưu lịch sử và xem biểu đồ theo tài khoản.
--   Quản trị viên: quản lý bài viết và danh mục, khóa/mở tài khoản người
-    dùng, soạn thảo nội dung định dạng cơ bản và tải ảnh bài viết lên.
--   Chatbot sức khỏe: PHP gọi Ollama, hỗ trợ hội thoại mới, xem/tiếp
-    tục/xóa lịch sử hội thoại. Người dùng đã đăng nhập có lịch sử riêng.
--   Bảo mật cơ bản: mật khẩu được băm bằng `password_hash`, xác minh
-    bằng `password_verify`, truy vấn PDO có bind tham số và kiểm tra
-    quyền truy cập.
+## Chạy nhanh trên Windows/XAMPP
 
-> Nội dung sức khỏe chỉ mang tính tham khảo, không thay thế chẩn đoán
-> hoặc điều trị của bác sĩ. Nội dung mẫu cần được rà soát chuyên môn
-> trước khi sử dụng công khai.
+1. Bật **MySQL** trong XAMPP; bật Apache nếu dùng phpMyAdmin.
+2. **Máy mới:** import `website-yte-suckhoe/database/schema.sql` trong phpMyAdmin. File này tạo database `healthconnect_moi`.
+3. **Máy đã có dữ liệu:** Export sao lưu trước, chọn database đang dùng rồi import **`website-yte-suckhoe/database/upgrade_final.sql`**. Không import lại schema cài mới.
+4. Copy `website-yte-suckhoe/config.example.php` thành `config.local.php`. Điền database, đặt `setup_key` riêng dài ít nhất 16 ký tự nếu chưa có admin. Với server dưới đây, đặt `app_url` là `http://localhost:8000`.
+5. Mở CMD tại thư mục repo, chạy:
 
-## Công nghệ và yêu cầu
-
--   PHP 8.1 trở lên.
--   MySQL 8.x hoặc MariaDB 10.4 trở lên.
--   PHP extensions: `pdo_mysql`, `mbstring`, `curl`, `dom`, `fileinfo`.
--   Có thể chạy trên XAMPP cho Windows.
--   Bootstrap được tải từ CDN nên cần Internet để tải CSS/JavaScript.
--   Chatbot cần Ollama và model được cài trên máy chạy PHP.
--   Chức năng quên mật khẩu qua email cần cấu hình SMTP/sendmail hoặc
-    dịch vụ gửi email tương ứng. XAMPP mặc định thường chưa được cấu
-    hình để gửi email thật.
-
-## Cài đặt nhanh bằng XAMPP
-
-Hướng dẫn chi tiết nằm trong
-[`website-yte-suckhoe/HUONG_DAN.md`](website-yte-suckhoe/HUONG_DAN.md).
-
-1.  Đặt thư mục `HealthConnect` trong `C:\xampp\htdocs\`.
-2.  Khởi động Apache và MySQL trong XAMPP Control Panel.
-3.  Mở phpMyAdmin và import `website-yte-suckhoe/database/schema.sql`
-    nếu cài mới. Không import lại schema vào database đã có bảng.
-4.  Sao chép `website-yte-suckhoe/config.example.php` thành
-    `website-yte-suckhoe/config.local.php` rồi cập nhật cấu hình
-    database và `app_url`.
-5.  Mở `setup.php` theo URL được ghi trong hướng dẫn, tạo tài khoản
-    admin và dữ liệu mẫu nếu cần.
-6.  Đăng nhập và kiểm tra các chức năng. Sau khi cài đặt thành công, nên
-    xóa hoặc vô hiệu hóa `setup.php`.
-
-Không mở các trang PHP bằng cách nhấp đúp vào file hoặc dùng VS Code
-Live Server; PHP cần được chạy qua Apache hoặc PHP development server.
-
-## Chatbot Ollama
-
-Trên máy chạy PHP, cài Ollama và tải model ví dụ:
-
-``` bash
-ollama pull qwen2.5:3b
-ollama serve
+```bat
+C:\xampp\php\php.exe website-yte-suckhoe\tools\doctor.php
+cd website-yte-suckhoe
+C:\xampp\php\php.exe -S localhost:8000 -t . tools/router.php
 ```
 
-Nếu Ollama đã chạy nền thì không cần chạy `ollama serve` lần nữa. Mặc
-định ứng dụng gọi API tại `http://127.0.0.1:11434/api/chat` với model
-`qwen2.5:3b`. Có thể thay đổi trong `config.local.php`.
+6. Mở **http://localhost:8000/setup.php** nếu cài mới, tạo admin và chọn dữ liệu mẫu. Sau đó mở **http://localhost:8000/index.php**. Admin dùng `dang-nhap.php?role=admin`.
+7. Máy nâng cấp chưa có bác sĩ: vào Quản trị → Bác sĩ → “Tạo 3 hồ sơ minh họa”, hoặc tự thêm bác sĩ và lịch làm việc.
 
-Luồng xử lý: trình duyệt → `api/chat.php` → Ollama → PHP lưu dữ liệu vào
-MySQL → trả lời trình duyệt. Khi Ollama không hoạt động, chatbot sẽ
-không thể tạo câu trả lời.
+Có thể dùng `CHAY_WINDOWS.bat` sau khi đã cấu hình database. Nếu dùng Apache trong htdocs, sửa `app_url` thành đúng URL thư mục/cổng Apache. Không mở file PHP bằng nhấp đúp hoặc Live Server.
 
-## Cấu trúc thư mục
+## Cấu hình dịch vụ
 
--   `website-yte-suckhoe/includes/bootstrap.php`: kết nối PDO, session,
-    CSRF, phân quyền và hàm dùng chung.
--   `website-yte-suckhoe/includes/layout.php`: header/footer và các
-    thành phần giao diện dùng chung.
--   Các file PHP ở thư mục `website-yte-suckhoe/`: chức năng dành cho
-    người dùng.
--   `website-yte-suckhoe/admin/`: chức năng quản trị.
--   `website-yte-suckhoe/api/chat.php`: gửi yêu cầu đến Ollama.
--   `website-yte-suckhoe/api/new-chat.php`: tạo hội thoại mới.
--   `website-yte-suckhoe/database/schema.sql`: tạo schema cho cài đặt
-    mới.
--   `website-yte-suckhoe/database/migration_php.sql`: migration cho
-    database cũ theo hướng dẫn.
--   `website-yte-suckhoe/database/seed.json`: dữ liệu mẫu.
--   `website-yte-suckhoe/assets/js/chatbot-php.js`: giao diện chatbot
-    gọi PHP.
--   `website-yte-suckhoe/uploads/`: ảnh bài viết được tải lên.
+- Extensions: `pdo_mysql`, `mbstring`, `curl`, `dom`, `fileinfo`, `SimpleXML`, `openssl`.
+- **Ollama:** cài trên máy PHP, chạy `ollama pull qwen2.5:3b`. Cấu hình URL/model trong config.local. Khi dịch vụ dừng, chatbot báo chưa kết nối được.
+- **Email:** dùng PHPMailer đã kèm source; đặt `mail_transport=smtp`, host, port, username/password, TLS và địa chỉ gửi trong config.local. Không commit mật khẩu. Hướng dẫn chi tiết trong `HUONG_DAN.md`.
+- **PWA:** HTTPS hoặc localhost; HTTP qua địa chỉ IP trong LAN thường không cài được. Cài trực tiếp từ trình duyệt, không phải APK/IPA.
 
-## Kiểm thử trước khi nộp
+## Tài liệu
 
-Tham khảo checklist đầy đủ trong phần **Tự kiểm tra trước khi nộp** của
-[`website-yte-suckhoe/HUONG_DAN.md`](website-yte-suckhoe/HUONG_DAN.md).
+- [Kế hoạch và checklist hoàn thiện, không chia ngày](KE_HOACH_HOAN_THIEN.md)
+- [Hướng dẫn cài mới, nâng cấp, SMTP, Ollama, PWA](website-yte-suckhoe/HUONG_DAN.md)
+- [Kiến trúc và ERD](website-yte-suckhoe/docs/KIEN_TRUC.md)
+- [Kịch bản demo](website-yte-suckhoe/docs/DEMO.md)
+- [Kết quả kiểm tra và giới hạn](website-yte-suckhoe/docs/KIEM_TRA_FINAL.md)
+- [Chạy bộ kiểm thử](tests/README.md)
+- [Đưa bản này vào repo nhóm](HUONG_DAN_GIT.md)
 
-Khi chụp ảnh minh chứng, cần để **hiển thị cả thanh địa chỉ trình
-duyệt** theo yêu cầu của giảng viên. Nhóm tự chuẩn bị file PDF báo cáo
-nếu môn học yêu cầu; repository này không kèm PDF báo cáo.
+## Dữ liệu và mã nguồn bên thứ ba
 
-## Lưu ý bảo mật
+Hồ sơ bác sĩ mẫu là giả lập. Nội dung mẫu và câu trả lời AI chỉ để tham khảo, không thay thế tư vấn chuyên môn. Không nhập dữ liệu bệnh nhân thật vào bản demo.
 
--   Không commit `config.local.php`, mật khẩu thật, khóa bí mật hoặc dữ
-    liệu người dùng.
--   Chỉ commit `config.example.php` khi file này không chứa thông tin bí
-    mật.
--   Không đưa ảnh người dùng hoặc dữ liệu cá nhân lên GitHub nếu không
-    cần thiết.
--   Sau khi cài đặt xong, xóa hoặc vô hiệu hóa `setup.php`.
--   Chỉ sử dụng PHP development server cho mục đích phát triển tại máy,
-    không dùng làm máy chủ production.
+Bootstrap 5.3.3 (MIT) được lưu trong `assets/vendor`; PHPMailer 7.1.1 (LGPL-2.1) trong `includes/vendor/PHPMailer`, kèm giấy phép và nguồn. Python/Node chỉ dùng cho kiểm thử tùy chọn, không cần để chạy ứng dụng PHP.

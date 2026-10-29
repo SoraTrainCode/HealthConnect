@@ -1,0 +1,9 @@
+<?php
+require __DIR__.'/includes/bootstrap.php';require __DIR__.'/includes/layout.php';require __DIR__.'/includes/appointments.php';
+$specialty=(string)($_GET['specialty']??'');
+$rows=query('SELECT * FROM doctors WHERE active=1'.($specialty?' AND specialty=?':'').' ORDER BY name',$specialty?[$specialty]:[])->fetchAll();
+head('Tìm bác sĩ phù hợp');
+?>
+<p class="page-intro">Xem chuyên khoa, lịch làm việc và gửi yêu cầu đặt lịch. Hồ sơ bác sĩ mẫu dùng để minh họa đồ án.</p>
+<form class="d-flex gap-2 mb-4" method="get"><label class="visually-hidden" for="specialty">Chuyên khoa</label><select id="specialty" name="specialty" class="form-select mb-0"><option value="">Tất cả chuyên khoa</option><?php foreach(appt_specialties() as $sp): ?><option <?php echo $specialty===$sp?'selected':''; ?>><?php echo e($sp); ?></option><?php endforeach; ?></select><button class="btn btn-brand">Lọc</button></form>
+<div class="row g-4"><?php foreach($rows as $d): $days=query('SELECT DISTINCT weekday FROM doctor_schedules WHERE doctor_id=? ORDER BY weekday',[$d['id']])->fetchAll(PDO::FETCH_COLUMN); ?><div class="col-md-6 col-xl-4"><article class="doctor-card"><div class="doctor-avatar" aria-hidden="true"><?php echo e(mb_substr($d['name'],0,1)); ?></div><span class="eyebrow"><?php echo e($d['specialty']); ?></span><h2 class="h4 mt-2"><?php echo e($d['name']); ?></h2><p><?php echo nl2br(e($d['bio'])); ?></p><p class="small text-muted"><?php echo e($d['room']); ?><br>Làm việc: <?php echo e(implode(', ',array_map(fn($day)=>'Thứ '.((int)$day+1),$days))); ?></p><a class="btn btn-brand mt-auto" href="dat-lich.php?doctor=<?php echo (int)$d['id']; ?>">Chọn ngày khám →</a></article></div><?php endforeach; ?></div><?php if(!$rows): ?><div class="empty-state">Chưa có bác sĩ phù hợp. Hãy chọn chuyên khoa khác.</div><?php endif; foot(); ?>

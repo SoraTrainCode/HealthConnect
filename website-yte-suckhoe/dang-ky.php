@@ -30,7 +30,7 @@ if (post()) {
         );
         session_regenerate_id(true);
         $_SESSION["uid"] = $newId;
-        redirect("tai-khoan.php");
+        redirect("suc-khoe.php");
     } catch (RuntimeException $ex) {
         $error =
             $ex instanceof PDOException

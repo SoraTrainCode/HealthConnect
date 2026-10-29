@@ -59,7 +59,7 @@ if (post()) {
         $_SESSION["uid"] = $u["id"];
         $_SESSION["auth_hash"] = hash("sha256", $u["password_hash"]);
         redirect(
-            $u["role"] === "admin" ? "admin/dashboard.php" : "tai-khoan.php",
+            $u["role"] === "admin" ? "admin/dashboard.php" : "suc-khoe.php",
         );
     } catch (RuntimeException $ex) {
         $error =

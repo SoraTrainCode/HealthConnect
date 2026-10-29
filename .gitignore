@@ -2,3 +2,8 @@ website-yte-suckhoe/config.local.php
 website-yte-suckhoe/uploads/*
 !website-yte-suckhoe/uploads/.htaccess
 *.log
+__pycache__/
+*.pyc
+node_modules/
+playwright-report/
+test-results/
