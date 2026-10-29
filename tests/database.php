@@ -28,7 +28,7 @@ try {
     $pdo->exec("USE `$name`");
     $pdo->exec("SET time_zone = '+07:00'");
     $root = dirname(__DIR__) . '/website-yte-suckhoe/database/';
-    $schema = file_get_contents($root . 'schema.sql');
+    $schema = str_replace("\r\n", "\n", file_get_contents($root . 'schema.sql'));
     $schema = preg_replace('/^(CREATE DATABASE.*|USE healthconnect_moi;)$/m', '', $schema);
     $pdo->exec($schema);
     verify(count(query('SHOW TABLES')->fetchAll()) === 16, 'Fresh install has all sixteen tables');
