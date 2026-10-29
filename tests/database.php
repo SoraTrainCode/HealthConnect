@@ -28,7 +28,7 @@ try {
     $pdo->exec("USE `$name`");
     $pdo->exec("SET time_zone = '+07:00'");
     $root = dirname(__DIR__) . '/website-yte-suckhoe/database/';
-    $schema = file_get_contents($root . 'schema.sql');
+    $schema = str_replace("\r\n", "\n", file_get_contents($root . 'schema.sql'));
     $schema = preg_replace('/^(CREATE DATABASE.*|USE healthconnect_moi;)$/m', '', $schema);
     $pdo->exec($schema);
     verify(count(query('SHOW TABLES')->fetchAll()) === 16, 'Fresh install has all sixteen tables');
@@ -84,7 +84,7 @@ try {
     query('DELETE FROM appointments');
     require dirname(__DIR__).'/website-yte-suckhoe/includes/demo.php';
     seed_demo_doctors();
-    verify((int)query('SELECT COUNT(*) FROM doctors')->fetchColumn()===3,'Demo doctors seeded');
+    verify((int)query('SELECT COUNT(*) FROM doctors')->fetchColumn()===8,'Eight demo doctors seeded');
     $doctorDay=date('Y-m-d',strtotime('+2 days'));
     while(date('w',strtotime($doctorDay))==='0') $doctorDay=date('Y-m-d',strtotime($doctorDay.' +1 day'));
     $u=['id'=>1];

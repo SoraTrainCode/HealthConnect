@@ -26,6 +26,8 @@ return [
     // Khoảng làm mới cache RSS (30-60 phút), tính bằng giây.
     "news_cache_ttl" => 3600,
     "news_sources" => [
-        ["name" => "CDC Online Newsroom", "url" => "https://tools.cdc.gov/api/v2/resources/media/132608.rss"],
+        ["name" => "Tuổi Trẻ Sức khỏe", "url" => "https://tuoitre.vn/rss/suc-khoe.rss"],
+        ["name" => "Thanh Niên Sức khỏe", "url" => "https://thanhnien.vn/rss/suc-khoe.rss"],
+        ["name" => "Sức khỏe & Đời sống", "url" => "https://suckhoedoisong.vn/rss/home.rss"],
     ],
 ];

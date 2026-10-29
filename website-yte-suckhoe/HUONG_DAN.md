@@ -20,7 +20,7 @@ C:\xampp\php\php.exe tools\doctor.php
 C:\xampp\php\php.exe -S localhost:8000 -t . tools/router.php
 ```
 
-7. Mở `http://localhost:8000/setup.php`. Nhập khóa vừa đặt và tài khoản admin tự chọn. Chọn dữ liệu mẫu để có bài viết và 3 bác sĩ giả lập với lịch tuần.
+7. Mở `http://localhost:8000/setup.php`. Nhập khóa vừa đặt và tài khoản admin tự chọn. Chọn dữ liệu mẫu để có bài viết và 8 bác sĩ giả lập thuộc 8 chuyên khoa với lịch tuần.
 8. Setup tự khóa khi đã có admin. Có thể xóa/vô hiệu hóa setup.php trên hosting. Đăng nhập admin ở `dang-nhap.php?role=admin`, user ở `dang-nhap.php?role=user`.
 9. Mở `index.php`, đăng ký một tài khoản người dùng để demo. Không có mật khẩu admin dùng chung/hardcode.
 
@@ -32,7 +32,7 @@ Chạy bằng Apache: đặt source trong `C:\xampp\htdocs\HealthConnect`, mở 
 2. Áp dụng bản code mới theo `HUONG_DAN_GIT.md`; giữ nguyên config.local.php và ảnh uploads của máy cậu.
 3. Trong phpMyAdmin **chọn đúng database của dự án**, import `database/upgrade_final.sql`. Script không chọn tên DB cố định, không DROP/TRUNCATE dữ liệu; có thể chạy lại.
 4. Script thêm bác sĩ, lịch tuần, ngày nghỉ, nhật ký lịch hẹn, nhật ký sức khỏe, mục tiêu và cột doctor_id. Lịch cũ giữ doctor_id=NULL và hiển thị “Tiếp nhận chung”.
-5. Chạy `php tools/doctor.php`. Nếu chưa có bác sĩ, đăng nhập admin → Bác sĩ → “Tạo 3 hồ sơ minh họa”, hoặc nhập thủ công. Chỉ tạo mẫu khi danh sách bác sĩ đang trống.
+5. Chạy `php tools/doctor.php`. Nếu chưa có bác sĩ, đăng nhập admin → Bác sĩ → “Tạo 8 hồ sơ giả lập”, hoặc nhập thủ công. Chỉ tạo mẫu khi danh sách bác sĩ đang trống.
 6. Kiểm tra tài khoản, bài viết và lịch cũ trước khi tiếp tục demo. Nếu lỗi nâng cấp, không import schema cài mới đè lên DB hiện tại; kiểm tra thông báo SQL và bản sao lưu.
 
 ## 4. Sử dụng các chức năng
@@ -84,11 +84,11 @@ Nếu Ollama đã chạy nền thì không chạy thêm serve. Cấu hình `olla
 
 ## 7. Tin RSS
 
-Nguồn mặc định giữ CDC Online Newsroom của nhóm. Có thể sửa mảng `news_sources` trong config.local, tối đa 3 nguồn mỗi lượt. Endpoint nguồn phải trả XML qua HTTPS trực tiếp; redirect không được theo tự động. Cần curl + SimpleXML.
+Nguồn trong config mẫu là 3 nguồn tiếng Việt: Tuổi Trẻ Sức khỏe, Thanh Niên Sức khỏe và Sức khỏe & Đời sống. `config.local.php` là file riêng của từng máy và không được Git theo dõi; sau khi cập nhật source, người chạy cần tự sửa mảng `news_sources` trong config.local.php thành đúng 3 nguồn này nếu file local vẫn đang dùng cấu hình cũ. Mỗi lượt tối đa 3 nguồn. Endpoint nguồn phải trả XML qua HTTPS trực tiếp; redirect không được theo tự động. Cần curl + SimpleXML.
 
 Cache trong thư mục tạm của PHP, 30–60 phút theo news_cache_ttl. Làm mới theo yêu cầu truy cập khi hết hạn, có khóa tránh nhiều request tải cùng lúc. Nếu nguồn lỗi, giữ tin cũ và báo trạng thái cũ. API `api/tin-tuc.php` chỉ trả cache/theo TTL, tham số refresh không bỏ qua giới hạn.
 
-Trang chủ trộn tin mới nhất; trang tin có tab bài viết nội bộ và tab RSS. Bài RSS mở website gốc, không nhập thành bài do nhóm sở hữu. Danh mục nội bộ không áp cho tin RSS. Nguồn tiếng Anh không được tự dịch.
+Trang chủ trộn tin mới nhất; trang tin có tab bài viết nội bộ và tab RSS. Bài RSS mở website gốc, không nhập thành bài do nhóm sở hữu. Danh mục nội bộ không áp cho tin RSS. Nội dung tiêu đề và tóm tắt lấy từ feed gốc, không dịch máy hay sao chép toàn văn.
 
 ## 8. Giao diện điện thoại và cài PWA
 
