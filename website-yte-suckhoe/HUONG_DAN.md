@@ -84,11 +84,11 @@ Nếu Ollama đã chạy nền thì không chạy thêm serve. Cấu hình `olla
 
 ## 7. Tin RSS
 
-Nguồn mặc định giữ CDC Online Newsroom của nhóm. Có thể sửa mảng `news_sources` trong config.local, tối đa 3 nguồn mỗi lượt. Endpoint nguồn phải trả XML qua HTTPS trực tiếp; redirect không được theo tự động. Cần curl + SimpleXML.
+Nguồn trong config mẫu là 3 nguồn tiếng Việt: Tuổi Trẻ Sức khỏe, Thanh Niên Sức khỏe và Sức khỏe & Đời sống. `config.local.php` là file riêng của từng máy và không được Git theo dõi; sau khi cập nhật source, người chạy cần tự sửa mảng `news_sources` trong config.local.php thành đúng 3 nguồn này nếu file local vẫn đang dùng cấu hình cũ. Mỗi lượt tối đa 3 nguồn. Endpoint nguồn phải trả XML qua HTTPS trực tiếp; redirect không được theo tự động. Cần curl + SimpleXML.
 
 Cache trong thư mục tạm của PHP, 30–60 phút theo news_cache_ttl. Làm mới theo yêu cầu truy cập khi hết hạn, có khóa tránh nhiều request tải cùng lúc. Nếu nguồn lỗi, giữ tin cũ và báo trạng thái cũ. API `api/tin-tuc.php` chỉ trả cache/theo TTL, tham số refresh không bỏ qua giới hạn.
 
-Trang chủ trộn tin mới nhất; trang tin có tab bài viết nội bộ và tab RSS. Bài RSS mở website gốc, không nhập thành bài do nhóm sở hữu. Danh mục nội bộ không áp cho tin RSS. Nguồn tiếng Anh không được tự dịch.
+Trang chủ trộn tin mới nhất; trang tin có tab bài viết nội bộ và tab RSS. Bài RSS mở website gốc, không nhập thành bài do nhóm sở hữu. Danh mục nội bộ không áp cho tin RSS. Nội dung tiêu đề và tóm tắt lấy từ feed gốc, không dịch máy hay sao chép toàn văn.
 
 ## 8. Giao diện điện thoại và cài PWA
 

@@ -29,3 +29,21 @@ Nguồn CDC mặc định và endpoint WHO tham khảo đã được truy cập 
 - Backup/restore trên bản sao dữ liệu nhóm, ảnh/PDF báo cáo và phần thuyết trình.
 
 Bộ test có thể chạy lại theo `tests/README.md`. Các tài liệu kiểm thử phiên bản trước trong docs là lịch sử, không cộng số lượng đó vào kết quả hiện tại.
+
+## Cập nhật 30/10/2026 — RSS tiếng Việt và trang bác sĩ
+
+Kiểm tra bổ sung trên nhánh `hoan-thien/tin-tuc-tieng-viet-bac-si`, PHP XAMPP 8.2.12 và MariaDB cục bộ:
+
+| Kiểm tra | Kết quả |
+|---|---:|
+| PHP lint các file PHP đã sửa | 7 file đạt |
+| `tests/news.php` | 6 kiểm tra đạt |
+| `tests/appointments.php` | 15 kiểm tra đạt |
+| `tests/database.php` | 38 kiểm tra đạt; database test ngẫu nhiên đã được xóa |
+| HTTP API tin RSS | 200, 100 bài, đủ 8 key tiếng Việt; dữ liệu mới từ cả Tuổi Trẻ, Thanh Niên và Sức khỏe & Đời sống |
+| HTTP trang tin RSS | 200, tên nguồn tiếng Việt, không còn câu báo nguồn có thể bằng tiếng Anh |
+| HTTP bác sĩ và trang chủ | 200 cho tìm theo tên/chuyên khoa, chi tiết ID 1, ID không tồn tại và index; index có 3 link đặt lịch |
+| Edge headless 390 px | 4 trang (index, danh sách bác sĩ, chi tiết bác sĩ, RSS) không tràn ngang |
+| `git diff --check` | Đạt |
+
+API mẫu thực tế: `Tưởng chỉ là tăng cân: 3 biểu hiện cảnh báo liên quan đến rối loạn nội tiết` — nguồn `Thanh Niên Sức khỏe`, có liên kết bài gốc. `config.local.php` vẫn là cấu hình riêng: máy đã cài trước cần tự cập nhật `news_sources` sang ba nguồn hiện hành theo `HUONG_DAN.md`.
