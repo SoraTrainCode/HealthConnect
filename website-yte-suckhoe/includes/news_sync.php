@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 function news_cache_path(): string
 {
-    return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . "healthconnect-rss-" . hash("sha256", dirname(__DIR__)) . ".json";
+    $sources = $GLOBALS["config"]["news_sources"] ?? [];
+    return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . "healthconnect-rss-" . hash("sha256", dirname(__DIR__) . "\0" . json_encode($sources, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)) . ".json";
 }
 
 function news_cache_read(): array
