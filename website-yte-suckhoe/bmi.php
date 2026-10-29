@@ -6,6 +6,11 @@ $result = null;
 if (post()) {
     check_csrf();
     try {
+        if (($_POST['act']??'')==='delete') {
+            if (!$u) throw new RuntimeException('Vui lòng đăng nhập.');
+            query('DELETE FROM bmi_logs WHERE id=? AND user_id=?',[(int)($_POST['id']??0),$u['id']]);
+            flash('Đã xóa lần đo.');redirect('bmi.php');
+        }
         $height = (float) ($_POST["height"] ?? 0);
         $weight = (float) ($_POST["weight"] ?? 0);
         if ($height < 80 || $height > 250 || $weight < 20 || $weight > 300) {
@@ -63,7 +68,7 @@ function bmi_history(int $uid): void
     $logs = query(
         "SELECT * FROM bmi_logs WHERE user_id=? ORDER BY measured_at DESC,id DESC LIMIT 100",
         [$uid],
-    )->fetchAll(); ?><h2 class="h5">100 lần đo gần nhất</h2><div class="table-responsive"><table class="table"><thead><tr><th>Ngày đo</th><th>Cao (cm)</th><th>Nặng (kg)</th><th>BMI</th><th>Phân loại</th><th>Ghi chú</th></tr></thead><tbody><?php foreach ($logs as $l): ?><tr><td><?php echo e($l["measured_at"]); ?></td><td><?php echo e($l["height_cm"]); ?></td><td><?php echo e($l["weight_kg"]); ?></td><td><?php echo e($l["bmi_value"]); ?></td><td><?php echo e($l["classification"]); ?></td><td><?php echo e($l["note"]); ?></td></tr><?php endforeach; ?></tbody></table></div><?php
+    )->fetchAll(); ?><h2 class="h5">100 lần đo gần nhất</h2><div class="table-responsive"><table class="table"><thead><tr><th>Ngày đo</th><th>Cao (cm)</th><th>Nặng (kg)</th><th>BMI</th><th>Phân loại</th><th>Ghi chú</th><th></th></tr></thead><tbody><?php foreach ($logs as $l): ?><tr><td><?php echo e($l["measured_at"]); ?></td><td><?php echo e($l["height_cm"]); ?></td><td><?php echo e($l["weight_kg"]); ?></td><td><?php echo e($l["bmi_value"]); ?></td><td><?php echo e($l["classification"]); ?></td><td><?php echo e($l["note"]); ?></td><td><form method="post" onsubmit="return confirm('Xóa lần đo này?')"><?php echo csrf(); ?><input type="hidden" name="act" value="delete"><input type="hidden" name="id" value="<?php echo (int)$l['id']; ?>"><button class="btn btn-sm text-danger">Xóa</button></form></td></tr><?php endforeach; ?></tbody></table></div><?php
 if (!$logs) {
     echo "<p>Chưa có lần đo nào.</p>";
 }

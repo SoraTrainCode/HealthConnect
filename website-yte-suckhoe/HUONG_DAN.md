@@ -1,286 +1,110 @@
-# Hướng dẫn cài đặt và kiểm thử HealthConnect
+# Hướng dẫn chạy HealthConnect
 
-Tài liệu này hướng dẫn chạy HealthConnect bằng XAMPP trên Windows. Dự án
-sử dụng PHP và MySQL/MariaDB để xử lý dữ liệu; không chạy trực tiếp bằng
-cách mở file PHP hoặc dùng VS Code Live Server.
+## 1. Yêu cầu
 
-## 1. Yêu cầu môi trường
+PHP 8.1 trở lên; MySQL 8 hoặc MariaDB 10.4 trở lên; các extension pdo_mysql, mbstring, curl, dom, fileinfo, SimpleXML, openssl. XAMPP có thể cung cấp PHP/Apache/MariaDB. Bootstrap và PHPMailer đã nằm trong source, không cần npm/composer để chạy web.
 
--   PHP 8.1 trở lên.
--   MySQL 8.x hoặc MariaDB 10.4 trở lên.
--   PHP extensions cần bật: `pdo_mysql`, `mbstring`, `curl`, `dom`,
-    `fileinfo`.
--   XAMPP trên Windows có thể đáp ứng các yêu cầu trên. MySQL trong
-    XAMPP thường là MariaDB và có thể dùng với script của dự án.
--   Internet để tải Bootstrap từ CDN.
--   Ollama nếu muốn sử dụng chatbot.
--   Cấu hình gửi email nếu muốn sử dụng chức năng quên mật khẩu qua
-    email.
+Mọi trang chính chạy qua PHP. HTML/CSS/JS là giao diện được PHP trả về trình duyệt; không chạy một frontend server riêng. Các file `.html` cũ chỉ chuyển sang trang PHP tương ứng.
 
-phpMyAdmin là giao diện quản lý database, không phải một hệ quản trị cơ
-sở dữ liệu riêng.
+## 2. Cài mới
 
-## 2. Đặt thư mục dự án
+1. Giải nén source vào thư mục riêng hoặc dùng repo đã clone. Không tạo thêm repo lồng vào repo hiện có.
+2. Bật MySQL và Apache trong XAMPP, vào phpMyAdmin.
+3. Import `database/schema.sql` một lần. Database mặc định tên `healthconnect_moi`, có 16 bảng. Nếu đã có DB cùng tên và có dữ liệu, dùng quy trình nâng cấp ở mục 3.
+4. Copy `config.example.php` thành `config.local.php`. Chỉnh db_host, db_port, db_name, db_user, db_pass theo XAMPP.
+5. Đặt setup_key thành chuỗi riêng dài ít nhất 16 ký tự. Đặt app_url đúng cách chạy; ví dụ server PHP bên dưới là `http://localhost:8000`.
+6. Mở CMD tại thư mục `website-yte-suckhoe`:
 
-1.  Giải nén hoặc clone dự án.
-
-2.  Đặt thư mục `HealthConnect` tại:
-
-    `C:\xampp\htdocs\HealthConnect`
-
-3.  Đảm bảo đường dẫn dự án có file:
-
-    `C:\xampp\htdocs\HealthConnect\website-yte-suckhoe\setup.php`
-
-Nếu thư mục thực tế khác, hãy điều chỉnh URL và `app_url` theo đúng vị
-trí.
-
-## 3. Khởi động XAMPP
-
-1.  Mở XAMPP Control Panel.
-2.  Nhấn **Start** ở Apache.
-3.  Nhấn **Start** ở MySQL.
-4.  Mở phpMyAdmin tại `http://localhost/phpmyadmin`.
-
-Nếu Apache dùng cổng 8080, hãy dùng `http://localhost:8080` thay cho
-`http://localhost` trong các URL của ứng dụng.
-
-## 4. Tạo hoặc nâng cấp database
-
-### Cài đặt mới
-
-Chỉ khi chưa có database/schema của dự án, mở phpMyAdmin → **Import** và
-chọn:
-
-`website-yte-suckhoe/database/schema.sql`
-
-Script tạo database `healthconnect_moi` cùng các bảng cần thiết.
-
-**Không import lại schema vào database đã có bảng.** Việc import lại có
-thể gây lỗi hoặc ảnh hưởng dữ liệu hiện có.
-
-### Đã có database từ phiên bản cũ
-
-Nếu đã import schema cũ của repository, chỉ import:
-
-`website-yte-suckhoe/database/migration_php.sql`
-
-Chỉ thực hiện migration khi phù hợp với trạng thái database hiện tại.
-Không xóa database cũ để thử sửa lỗi; hãy sao lưu trước khi thay đổi
-schema.
-
-## 5. Cấu hình ứng dụng
-
-Trong thư mục `website-yte-suckhoe`, sao chép:
-
-`config.example.php`
-
-thành:
-
-`config.local.php`
-
-Mở `config.local.php` và kiểm tra các thiết lập database. Với XAMPP mặc
-định, các giá trị thường là:
-
--   Host: `127.0.0.1`
--   Port: `3306`
--   Database: `healthconnect_moi`
--   Username: `root`
--   Password: để trống, nếu bạn chưa tự đặt mật khẩu MySQL
-
-Nếu máy đã đổi username, password hoặc port, hãy nhập giá trị thực tế
-của máy đó.
-
-### Khóa cài đặt và URL
-
--   Đặt `setup_key` thành chuỗi riêng dài ít nhất 16 ký tự. Không dùng
-    mật khẩu đăng nhập làm khóa này.
--   Đặt `app_url` đúng với URL thư mục ứng dụng.
--   Nếu Apache chạy cổng 8080, ví dụ `app_url` là
-    `http://localhost:8080/HealthConnect/website-yte-suckhoe`.
--   Không đưa `config.local.php` lên GitHub. Chỉ commit file cấu hình
-    mẫu khi không có mật khẩu hoặc khóa bí mật thật.
-
-## 6. Tạo tài khoản quản trị
-
-Mở URL cài đặt theo cổng Apache của bạn:
-
--   Apache cổng 80:
-    `http://localhost/HealthConnect/website-yte-suckhoe/setup.php`
--   Apache cổng 8080:
-    `http://localhost:8080/HealthConnect/website-yte-suckhoe/setup.php`
-
-Nhập khóa `setup_key`, họ tên, email và mật khẩu quản trị. Có thể chọn
-tạo dữ liệu bài viết và danh mục mẫu để thử giao diện.
-
-Khi hoàn tất, đăng nhập tại:
-
--   Cổng 80:
-    `http://localhost/HealthConnect/website-yte-suckhoe/dang-nhap.php`
--   Cổng 8080:
-    `http://localhost:8080/HealthConnect/website-yte-suckhoe/dang-nhap.php`
-
-Trang chủ:
-
--   Cổng 80:
-    `http://localhost/HealthConnect/website-yte-suckhoe/index.php`
--   Cổng 8080:
-    `http://localhost:8080/HealthConnect/website-yte-suckhoe/index.php`
-
-Sau khi tạo admin thành công, `setup.php` sẽ tự khóa khi phát hiện đã có
-admin. Để tăng an toàn, hãy xóa hoặc vô hiệu hóa file `setup.php` sau
-khi cài đặt xong.
-
-## 7. Chạy bằng PHP CLI (tùy chọn)
-
-Nếu không dùng Apache, mở terminal tại thư mục `website-yte-suckhoe` và
-chạy:
-
-``` bash
-php -S localhost:8000 tools/router.php
+```bat
+C:\xampp\php\php.exe tools\doctor.php
+C:\xampp\php\php.exe -S localhost:8000 -t . tools/router.php
 ```
 
-Database vẫn phải chạy riêng. Khi dùng cách này, đặt `app_url` thành
-`http://localhost:8000`.
+7. Mở `http://localhost:8000/setup.php`. Nhập khóa vừa đặt và tài khoản admin tự chọn. Chọn dữ liệu mẫu để có bài viết và 3 bác sĩ giả lập với lịch tuần.
+8. Setup tự khóa khi đã có admin. Có thể xóa/vô hiệu hóa setup.php trên hosting. Đăng nhập admin ở `dang-nhap.php?role=admin`, user ở `dang-nhap.php?role=user`.
+9. Mở `index.php`, đăng ký một tài khoản người dùng để demo. Không có mật khẩu admin dùng chung/hardcode.
 
-Router đi kèm giúp chặn truy cập trực tiếp một số tài liệu/config/SQL.
-PHP development server chỉ dành cho phát triển và kiểm thử tại máy,
-không dùng làm máy chủ production.
+Chạy bằng Apache: đặt source trong `C:\xampp\htdocs\HealthConnect`, mở `http://localhost/HealthConnect/website-yte-suckhoe/`; app_url phải trỏ đúng địa chỉ đó. Nếu Apache dùng 8080, thêm `:8080`. Với cách này không cần chạy `php -S`.
 
-## 8. Cấu hình chatbot Ollama
+## 3. Nâng cấp bản đã có dữ liệu
 
-Ollama phải chạy trên máy chủ đang chạy PHP.
+1. Export database đang dùng trong phpMyAdmin, giữ file sao lưu ngoài thư mục public và ngoài Git.
+2. Áp dụng bản code mới theo `HUONG_DAN_GIT.md`; giữ nguyên config.local.php và ảnh uploads của máy cậu.
+3. Trong phpMyAdmin **chọn đúng database của dự án**, import `database/upgrade_final.sql`. Script không chọn tên DB cố định, không DROP/TRUNCATE dữ liệu; có thể chạy lại.
+4. Script thêm bác sĩ, lịch tuần, ngày nghỉ, nhật ký lịch hẹn, nhật ký sức khỏe, mục tiêu và cột doctor_id. Lịch cũ giữ doctor_id=NULL và hiển thị “Tiếp nhận chung”.
+5. Chạy `php tools/doctor.php`. Nếu chưa có bác sĩ, đăng nhập admin → Bác sĩ → “Tạo 3 hồ sơ minh họa”, hoặc nhập thủ công. Chỉ tạo mẫu khi danh sách bác sĩ đang trống.
+6. Kiểm tra tài khoản, bài viết và lịch cũ trước khi tiếp tục demo. Nếu lỗi nâng cấp, không import schema cài mới đè lên DB hiện tại; kiểm tra thông báo SQL và bản sao lưu.
 
-1.  Cài Ollama.
+## 4. Sử dụng các chức năng
 
-2.  Tải model ví dụ:
+**Người dùng:** đăng ký/đăng nhập → Sức khỏe → ghi BMI, nhật ký theo ngày, mục tiêu; xem lịch sắp tới; tải CSV. Nhật ký cùng ngày được cập nhật thay vì tạo trùng. Có thể sửa/xóa các bản ghi của mình.
 
-    ``` bash
-    ollama pull qwen2.5:3b
-    ```
+**Đặt lịch:** xem Bác sĩ → chọn ngày trong 30 ngày → chọn giờ còn chỗ → thông tin người khám → gửi. Mỗi bác sĩ có một chỗ/khung giờ; mỗi user tối đa 3 lịch tương lai. Một user không đặt trùng giờ ở hai bác sĩ. Ngày nghỉ không nhận lịch. Yêu cầu ban đầu là “Chờ xác nhận”.
 
-3.  Nếu Ollama chưa tự chạy nền, mở terminal và chạy:
+**Admin:** Quản trị → Bác sĩ để cấu hình ngày/giờ và ngày nghỉ; Lịch khám để xem tổng quan ngày sắp tới, lọc ngày/trạng thái/bác sĩ, xác nhận hoặc hủy. Không thay lịch tuần nếu bỏ giờ đã có lịch tương lai chưa xử lý. Ngừng nhận lịch mới giữ nguyên lịch đã đặt; cần chủ động xử lý chúng.
 
-    ``` bash
-    ollama serve
-    ```
+**Trạng thái:** pending → confirmed/cancelled; confirmed → done/no_show/cancelled. done/no_show chỉ sau giờ hẹn. cancelled → pending chỉ nếu còn ở tương lai và qua lại đầy đủ kiểm tra. done/no_show không mở lại. User chỉ hủy lịch của mình khi chưa qua giờ và còn pending/confirmed.
 
-4.  Kiểm tra cấu hình trong `config.local.php`:
+**Phiếu hẹn:** xem chi tiết/lịch sử, in, tải ICS. File ICS là bản chụp lúc tải, không tự đồng bộ với web; cần xem trạng thái web trước khi đến. Lịch khám, bác sĩ và cơ sở trong dữ liệu mẫu là mô phỏng.
 
-    -   URL API mặc định: `http://127.0.0.1:11434/api/chat`
-    -   Model mặc định: `qwen2.5:3b`
+## 5. Email reset bằng SMTP
 
-Nếu Ollama chạy trên máy khác, hãy thay URL bằng địa chỉ của máy đó và
-bảo đảm PHP có thể kết nối tới máy chủ Ollama.
+PHPMailer đã kèm trong `includes/vendor/PHPMailer`. Sửa config.local, ví dụ cấu trúc:
 
-Luồng hoạt động: trình duyệt → `api/chat.php` → Ollama → PHP lưu vào
-MySQL → trả lời trình duyệt.
+```php
+'mail_transport' => 'smtp',
+'mail_from' => 'dia-chi-gui-cua-ban@example.com',
+'smtp_host' => 'smtp.nha-cung-cap-cua-ban',
+'smtp_port' => '587',
+'smtp_username' => 'tai-khoan-smtp',
+'smtp_password' => 'mat-khau-hoac-app-password-rieng',
+'smtp_security' => 'tls',
+'smtp_auth' => '1',
+'app_url' => 'https://ten-mien-cua-ban/duong-dan-web',
+```
 
-Khách chỉ giữ ngữ cảnh trong session. Người đăng nhập có lịch sử hội
-thoại riêng trong `chat_sessions` và `chat_messages`. Tạo chat mới mở
-một phiên mới, không tự xóa phiên cũ. Khi AI lỗi, ứng dụng không lưu hội
-thoại lỗi như một câu trả lời thành công.
+Đây là giá trị minh họa, phải thay theo dịch vụ email của cậu. `tls` dùng STARTTLS, thường ở cổng 587; `ssl` dùng SMTPS, thường ở 465. Không tắt xác minh TLS. App password nếu có phụ thuộc nhà cung cấp.
 
-Giới hạn chủ đề được hướng dẫn bằng system prompt nhưng không bảo đảm AI
-luôn tuân thủ hoàn toàn. Nội dung chatbot liên quan sức khỏe chỉ mang
-tính tham khảo và cần được rà soát chuyên môn trước khi công khai.
+Nếu dùng `mail_transport=mail`, PHP cần sendmail/SMTP được cấu hình; XAMPP mặc định thường chưa gửi được. Trang quên mật khẩu trả thông báo chung để không lộ email có tài khoản hay không. Token chỉ lưu bản băm, hết hạn sau 15 phút, chỉ dùng một lần. Đổi mật khẩu vô hiệu hóa phiên đăng nhập cũ.
 
-## 9. Cấu hình email quên mật khẩu
+Bộ kiểm thử dùng SMTP giả lập trên localhost, không gửi thư thật. Nhóm cần tự thử hộp thư thật sau khi điền cấu hình. Không commit config.local hoặc mật khẩu.
 
-Ứng dụng có quy trình tạo token ngẫu nhiên, lưu hash token, thời hạn 15
-phút và sử dụng một lần. PHP gửi liên kết qua `mail()`.
+## 6. Chatbot Ollama
 
-XAMPP mặc định thường chưa được cấu hình để gửi email thật. Muốn dùng
-chức năng này, cần cấu hình mail transport của PHP (SMTP/sendmail hoặc
-dịch vụ phù hợp), đặt `mail_from` thành địa chỉ gửi hợp lệ và bảo đảm
-`app_url` chính xác.
+Trên máy chạy PHP:
 
-Khi chưa cấu hình email, các chức năng khác vẫn có thể hoạt động nhưng
-người dùng sẽ không nhận được thư đặt lại mật khẩu.
+```sh
+ollama pull qwen2.5:3b
+ollama serve
+```
 
-## 10. Chức năng chính
+Nếu Ollama đã chạy nền thì không chạy thêm serve. Cấu hình `ollama_url` mặc định `http://127.0.0.1:11434/api/chat` và `ollama_model=qwen2.5:3b`. PHP gọi Ollama phía server; điện thoại không cần cài model. Máy yếu có thể phản hồi chậm; backend giới hạn thời gian chờ.
 
--   Tin tức y tế: xem danh sách, tìm kiếm, lọc danh mục, phân trang, xem
-    chi tiết và lượt xem.
--   Tài khoản: đăng ký, đăng nhập, đăng xuất, hồ sơ, đổi mật khẩu và
-    quên mật khẩu.
--   BMI: tính chỉ số BMI, lưu lịch sử theo tài khoản và xem biểu đồ.
--   Quản trị: CRUD bài viết/danh mục, khóa hoặc mở khóa người dùng, soạn
-    thảo nội dung và tải ảnh bài viết.
--   Chatbot: gửi câu hỏi qua PHP tới Ollama, tạo hội thoại mới, xem/tiếp
-    tục/xóa lịch sử.
+Đăng nhập để lưu lịch sử theo tài khoản. Lịch sử chat có xem/tiếp tục/xóa. Khi Ollama không hoạt động, web báo chưa kết nối được; các chức năng khác vẫn sử dụng bình thường. Nội dung chatbot chỉ tham khảo và không được giới thiệu như công cụ chẩn đoán/kê đơn.
 
-## 11. Checklist tự kiểm tra trước khi nộp
+## 7. Tin RSS
 
-1.  Cài mới, tạo admin; tải lại `setup.php` phải bị chặn sau khi admin
-    đã tồn tại.
-2.  Đăng ký hai tài khoản A và B; email trùng phải bị từ chối.
-3.  A đo BMI nhiều lần và sửa hồ sơ; B không được thấy lịch sử BMI của
-    A.
-4.  Khách có thể tính BMI nhưng kết quả không được lưu vào database theo
-    tài khoản.
-5.  Người dùng thường mở `admin/dashboard.php` phải bị chặn.
-6.  Admin tạo danh mục, tạo bài nháp rồi chuyển thành đã đăng; bài viết
-    xuất hiện trên trang tin tức.
-7.  Kiểm tra sửa bài viết, tải ảnh, tìm kiếm và bài viết liên quan.
-8.  Danh mục đang có bài viết không được xóa. Xóa bài thử nghiệm rồi mới
-    kiểm tra xóa danh mục.
-9.  Khóa tài khoản A: A không thể đăng nhập và session cũ không thể tiếp
-    tục truy cập khu vực riêng. Mở khóa để kiểm tra đăng nhập lại.
-10. Đổi mật khẩu: mật khẩu cũ không đăng nhập được. Kiểm tra đặt lại mật
-    khẩu qua email khi mail đã cấu hình.
-11. Bật Ollama; gửi hai câu liên tiếp, xem lịch sử, tiếp tục hội thoại
-    rồi xóa.
-12. Đăng nhập B và xác nhận B không thấy hội thoại riêng của A.
-13. Tắt Ollama; chatbot phải hiển thị lỗi kết nối và cho phép thử gửi
-    lại.
+Nguồn mặc định giữ CDC Online Newsroom của nhóm. Có thể sửa mảng `news_sources` trong config.local, tối đa 3 nguồn mỗi lượt. Endpoint nguồn phải trả XML qua HTTPS trực tiếp; redirect không được theo tự động. Cần curl + SimpleXML.
 
-## 12. Ảnh minh chứng và báo cáo
+Cache trong thư mục tạm của PHP, 30–60 phút theo news_cache_ttl. Làm mới theo yêu cầu truy cập khi hết hạn, có khóa tránh nhiều request tải cùng lúc. Nếu nguồn lỗi, giữ tin cũ và báo trạng thái cũ. API `api/tin-tuc.php` chỉ trả cache/theo TTL, tham số refresh không bỏ qua giới hạn.
 
--   Khi chụp ảnh minh chứng, phải để **hiển thị cả thanh địa chỉ trình
-    duyệt** theo yêu cầu của giảng viên.
--   Chụp các màn hình thể hiện chức năng thực tế, không chỉ chụp trang
-    chủ.
--   Nhóm tự chuẩn bị file PDF báo cáo nếu giảng viên yêu cầu. Repository
-    này không kèm PDF báo cáo.
--   Không chụp hoặc công khai mật khẩu, khóa cài đặt, thông tin cá nhân
-    hay dữ liệu người dùng thật.
+Trang chủ trộn tin mới nhất; trang tin có tab bài viết nội bộ và tab RSS. Bài RSS mở website gốc, không nhập thành bài do nhóm sở hữu. Danh mục nội bộ không áp cho tin RSS. Nguồn tiếng Anh không được tự dịch.
 
-## 13. Xử lý lỗi thường gặp
+## 8. Giao diện điện thoại và cài PWA
 
-### Trang PHP không chạy
+Thu nhỏ trình duyệt hoặc dùng điện thoại: giao diện tự đổi bố cục, có thanh điều hướng dưới. Để cài biểu tượng lên màn hình chính, xem `huong-dan-app.php`.
 
-Không mở file PHP bằng cách nhấp đúp hoặc dùng VS Code Live Server. Hãy
-chạy Apache trong XAMPP và truy cập qua `http://localhost/...` hoặc
-`http://localhost:8080/...`.
+- PWA cần HTTPS (hoặc localhost trên chính thiết bị đang chạy trình duyệt).
+- Điện thoại mở `http://IP-may-tinh:8000` qua LAN có thể xem responsive nhưng thường không cài PWA. Nếu demo LAN, PHP server phải bind địa chỉ LAN và firewall cho phép; chỉ mở trên mạng tin cậy, không dùng server phát triển để public Internet.
+- Chrome/Android: menu cài ứng dụng hoặc nút cài khi trình duyệt cho phép. iPhone/Safari: Chia sẻ → Thêm vào màn hình chính.
+- Manifest dùng đường dẫn tương đối, chạy được cả thư mục con trên Apache.
+- Service worker chỉ cache các file tĩnh trong danh sách rõ ràng. Không cache trang PHP, API, uploads hoặc tài khoản. Mất mạng hiển thị trang kết nối lại, không cho đặt lịch ngoại tuyến.
+- Khi sửa tài nguyên tĩnh đã cache cho lần phát hành sau, tăng phiên bản CACHE trong sw.js.
 
-### Không kết nối được database
+## 9. Hosting, backup và nghiệm thu
 
-Kiểm tra MySQL đang chạy, tên database, host, port, username và password
-trong `config.local.php`. Kiểm tra database đã được tạo/import đúng cách
-chưa.
+Hosting cần PHP/MySQL, HTTPS, các extension yêu cầu và quyền ghi uploads. Cấu hình app_url theo URL thật; dùng tài khoản DB riêng. Apache cần cho phép .htaccess; Nginx phải tự chặn config/includes/database/docs/tools và thực thi PHP trong uploads. Xem `docs/NGINX_EXAMPLE.conf` chỉ như mẫu để người quản trị điều chỉnh root/PHP socket.
 
-### Lỗi khi import schema
+Backup gồm SQL database + uploads + config.local riêng tư. Khôi phục vào database thử riêng, sửa db_name trong một bản copy config, đăng nhập và đối chiếu dữ liệu. Không đặt file backup SQL trong thư mục public.
 
-Nếu database đã có bảng, không import lại `schema.sql`. Xác định đây là
-cài mới hay nâng cấp từ schema cũ; sao lưu database trước khi chạy
-migration.
-
-### Chatbot không phản hồi
-
-Kiểm tra Ollama đang chạy trên máy chủ PHP, model đã được tải và
-`ollama_url`/model trong cấu hình đúng chưa.
-
-### Email quên mật khẩu không đến
-
-Kiểm tra cấu hình SMTP/sendmail của PHP, `mail_from`, `app_url` và thư
-mục spam. XAMPP mặc định thường chưa gửi được email thật.
-
-## 14. Bảo mật sau khi cài đặt
-
--   Xóa hoặc vô hiệu hóa `setup.php` sau khi tạo admin.
--   Không commit `config.local.php`, `.env`, mật khẩu hoặc khóa bí mật.
--   Không đưa ảnh người dùng hoặc dữ liệu cá nhân lên GitHub nếu không
-    cần thiết.  
--   Chỉ sử dụng PHP development server trong môi trường phát triển.
--   Kiểm tra nội dung y tế mẫu trước khi sử dụng công khai.
+Xem `docs/KIEM_TRA_FINAL.md`, `docs/DEMO.md` và `tests/README.md`. Nhóm tự làm PDF và chụp cả thanh địa chỉ theo yêu cầu môn học.

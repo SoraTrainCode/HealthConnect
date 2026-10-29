@@ -1,11 +1,12 @@
 <?php require __DIR__ . "/includes/bootstrap.php";
 require __DIR__ . "/includes/layout.php";
+require __DIR__ . "/includes/appointments.php";
+require __DIR__ . "/includes/demo.php";
 if (query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn()) {
     http_response_code(403);
     exit("Đã có admin. Trang cài đặt đã khóa.");
 }
 $error = null;
-die("DANG CHAY DUNG FILE SETUP MOI");
 if (post()) {
     check_csrf();
     try {
@@ -24,7 +25,8 @@ if (post()) {
         if (!$name || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException("Họ tên/email không hợp lệ.");
         }
-        db()->beginTransaction();
+        appt_begin();
+        if(query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn()) throw new RuntimeException('Đã có quản trị viên.');
         query(
             "INSERT INTO users(full_name,email,password_hash,role) VALUES(?,?,?,'admin')",
             [$name, $email, password_hash($pw, PASSWORD_DEFAULT)],
@@ -72,14 +74,15 @@ if (post()) {
                 );
             }
         }
+        if (isset($_POST['seed']) && !(int)query('SELECT COUNT(*) FROM doctors')->fetchColumn()) seed_demo_doctors();
         db()->commit();
         flash("Đã tạo admin và dữ liệu khởi tạo. Hãy đăng nhập.");
-        redirect("dang-nhap.php");
+        redirect("dang-nhap.php?role=admin");
     }catch (Throwable $ex) {
         if (db()->inTransaction()) {
             db()->rollBack();
         }
-        $error = "Lỗi: " . $ex->getMessage();
+        if($ex instanceof PDOException) {error_log((string)$ex);$error='Không khởi tạo được. Kiểm tra cấu hình và schema database.';} else $error=$ex->getMessage();
     }
 }
 head("Khởi tạo HealthConnect");
@@ -90,4 +93,4 @@ input("setup_key", "Khóa cài đặt", "", "password", true);
 input("full_name", "Tên quản trị viên", "", "text", true);
 input("email", "Email quản trị", "", "email", true);
 input("password", "Mật khẩu quản trị", "", "password", true);
-?><label class="d-block mb-3"><input type="checkbox" name="seed" checked> Tạo bài viết và danh mục mẫu để thử giao diện</label><button class="btn btn-brand">Khởi tạo</button></form><?php foot(); ?>
+?><label class="d-block mb-3"><input type="checkbox" name="seed" checked> Tạo bài viết, danh mục và hồ sơ bác sĩ minh họa</label><button class="btn btn-brand">Khởi tạo</button></form><?php foot(); ?>
