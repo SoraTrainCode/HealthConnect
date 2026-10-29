@@ -4,7 +4,7 @@
 
 - Import/cập nhật DB và chạy doctor.php trước buổi demo.
 - Một tài khoản admin và hai tài khoản user tự tạo; không trình chiếu mật khẩu/config.local.
-- Tạo 3 bác sĩ minh họa hoặc dữ liệu giả lập tự nhập; đặt lịch tuần.
+- Tạo 8 bác sĩ giả lập thuộc 8 chuyên khoa hoặc dữ liệu giả lập tự nhập; đặt lịch tuần.
 - User A có 2–3 lần đo BMI, 2 ngày nhật ký, một mục tiêu cân nặng. User B dùng kiểm tra tách dữ liệu.
 - Ollama và SMTP hoạt động nếu định demo trực tiếp. Khi chưa cấu hình, nói rõ giới hạn, không giả vờ dữ liệu mock là trả lời AI/email thật.
 

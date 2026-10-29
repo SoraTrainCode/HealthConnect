@@ -26,7 +26,7 @@ C:\xampp\php\php.exe -S localhost:8000 -t . tools/router.php
 ```
 
 6. Mở **http://localhost:8000/setup.php** nếu cài mới, tạo admin và chọn dữ liệu mẫu. Sau đó mở **http://localhost:8000/index.php**. Admin dùng `dang-nhap.php?role=admin`.
-7. Máy nâng cấp chưa có bác sĩ: vào Quản trị → Bác sĩ → “Tạo 3 hồ sơ minh họa”, hoặc tự thêm bác sĩ và lịch làm việc.
+7. Máy nâng cấp chưa có bác sĩ: vào Quản trị → Bác sĩ → “Tạo 8 hồ sơ giả lập”, hoặc tự thêm bác sĩ và lịch làm việc.
 
 Có thể dùng `CHAY_WINDOWS.bat` sau khi đã cấu hình database. Nếu dùng Apache trong htdocs, sửa `app_url` thành đúng URL thư mục/cổng Apache. Không mở file PHP bằng nhấp đúp hoặc Live Server.
 

@@ -20,7 +20,7 @@ C:\xampp\php\php.exe tools\doctor.php
 C:\xampp\php\php.exe -S localhost:8000 -t . tools/router.php
 ```
 
-7. Mở `http://localhost:8000/setup.php`. Nhập khóa vừa đặt và tài khoản admin tự chọn. Chọn dữ liệu mẫu để có bài viết và 3 bác sĩ giả lập với lịch tuần.
+7. Mở `http://localhost:8000/setup.php`. Nhập khóa vừa đặt và tài khoản admin tự chọn. Chọn dữ liệu mẫu để có bài viết và 8 bác sĩ giả lập thuộc 8 chuyên khoa với lịch tuần.
 8. Setup tự khóa khi đã có admin. Có thể xóa/vô hiệu hóa setup.php trên hosting. Đăng nhập admin ở `dang-nhap.php?role=admin`, user ở `dang-nhap.php?role=user`.
 9. Mở `index.php`, đăng ký một tài khoản người dùng để demo. Không có mật khẩu admin dùng chung/hardcode.
 
@@ -32,7 +32,7 @@ Chạy bằng Apache: đặt source trong `C:\xampp\htdocs\HealthConnect`, mở 
 2. Áp dụng bản code mới theo `HUONG_DAN_GIT.md`; giữ nguyên config.local.php và ảnh uploads của máy cậu.
 3. Trong phpMyAdmin **chọn đúng database của dự án**, import `database/upgrade_final.sql`. Script không chọn tên DB cố định, không DROP/TRUNCATE dữ liệu; có thể chạy lại.
 4. Script thêm bác sĩ, lịch tuần, ngày nghỉ, nhật ký lịch hẹn, nhật ký sức khỏe, mục tiêu và cột doctor_id. Lịch cũ giữ doctor_id=NULL và hiển thị “Tiếp nhận chung”.
-5. Chạy `php tools/doctor.php`. Nếu chưa có bác sĩ, đăng nhập admin → Bác sĩ → “Tạo 3 hồ sơ minh họa”, hoặc nhập thủ công. Chỉ tạo mẫu khi danh sách bác sĩ đang trống.
+5. Chạy `php tools/doctor.php`. Nếu chưa có bác sĩ, đăng nhập admin → Bác sĩ → “Tạo 8 hồ sơ giả lập”, hoặc nhập thủ công. Chỉ tạo mẫu khi danh sách bác sĩ đang trống.
 6. Kiểm tra tài khoản, bài viết và lịch cũ trước khi tiếp tục demo. Nếu lỗi nâng cấp, không import schema cài mới đè lên DB hiện tại; kiểm tra thông báo SQL và bản sao lưu.
 
 ## 4. Sử dụng các chức năng

@@ -47,3 +47,7 @@ Kiểm tra bổ sung trên nhánh `hoan-thien/tin-tuc-tieng-viet-bac-si`, PHP XA
 | `git diff --check` | Đạt |
 
 API mẫu thực tế: `Tưởng chỉ là tăng cân: 3 biểu hiện cảnh báo liên quan đến rối loạn nội tiết` — nguồn `Thanh Niên Sức khỏe`, có liên kết bài gốc. `config.local.php` vẫn là cấu hình riêng: máy đã cài trước cần tự cập nhật `news_sources` sang ba nguồn hiện hành theo `HUONG_DAN.md`.
+
+## Cập nhật bổ sung — hồ sơ bác sĩ minh họa
+
+Danh sách bác sĩ có đặt lịch dùng 8 hồ sơ giả lập, mỗi hồ sơ thuộc một chuyên khoa trong danh mục hiện có. Trang bác sĩ có thêm mục tham khảo riêng gồm 8 chuyên gia có thật, kèm liên kết nguồn chính thức và lời nhắc rằng họ không liên kết với HealthConnect, không nhận đặt lịch qua ứng dụng. Các hồ sơ mẫu chỉ được tạo khi danh sách bác sĩ còn trống.
