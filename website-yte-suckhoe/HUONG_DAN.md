@@ -65,7 +65,7 @@ PHPMailer đã kèm trong `includes/vendor/PHPMailer`. Sửa config.local, ví d
 
 Đây là giá trị minh họa, phải thay theo dịch vụ email của cậu. `tls` dùng STARTTLS, thường ở cổng 587; `ssl` dùng SMTPS, thường ở 465. Không tắt xác minh TLS. App password nếu có phụ thuộc nhà cung cấp.
 
-Nếu dùng `mail_transport=mail`, PHP cần sendmail/SMTP được cấu hình; XAMPP mặc định thường chưa gửi được. Trang quên mật khẩu trả thông báo chung để không lộ email có tài khoản hay không. Token chỉ lưu bản băm, hết hạn sau 15 phút, chỉ dùng một lần. Đổi mật khẩu vô hiệu hóa phiên đăng nhập cũ.
+Nếu dùng `mail_transport=mail`, PHP cần sendmail/SMTP được cấu hình; XAMPP mặc định thường chưa gửi được. Trang quên mật khẩu trả thông báo chung để không lộ email có tài khoản hay không. Email chứa mã 6 chữ số. Bấm Nhập mã đặt lại mật khẩu trong cùng trình duyệt, điền mã và mật khẩu mới. Mã chỉ dùng một lần trong 15 phút và cho tối đa 5 lần thử; database chỉ lưu bản băm có khóa. Chờ 5 phút trước khi xin mã thay thế. Đổi mật khẩu vô hiệu hóa phiên đăng nhập cũ.
 
 Bộ kiểm thử dùng SMTP giả lập trên localhost, không gửi thư thật. Nhóm cần tự thử hộp thư thật sau khi điền cấu hình. Không commit config.local hoặc mật khẩu.
 

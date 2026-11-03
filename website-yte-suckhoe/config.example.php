@@ -11,7 +11,7 @@ return [
     // URL Ollama trên MÁY CHẠY PHP, không phải máy khách.
     "ollama_url" => "http://127.0.0.1:11434/api/chat",
     "ollama_model" => "qwen2.5:3b",
-    // Dùng để tạo link email đặt lại mật khẩu; sửa nếu thư mục/cổng khác.
+    // URL cơ sở của website.
     "app_url" => "http://localhost/HealthConnect/website-yte-suckhoe",
     "mail_from" => "no-reply@example.com",
     // mail = PHP mail(); smtp = PHPMailer (đã kèm trong source).

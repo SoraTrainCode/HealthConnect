@@ -148,12 +148,26 @@ try:
  from email.parser import BytesParser
  from email.policy import default
  message=BytesParser(policy=default).parsebytes(smtp_messages[-1]);body_text=message.get_body(preferencelist=('plain',)).get_content() if message.is_multipart() else message.get_content()
- match=re.search(r'token=([a-f0-9]{64})',body_text);ok(bool(match),'SMTP reset link delivered to test capture')
- token=match[1];reset=post(a,'dat-lai-mat-khau.php?token='+token,{'token':token,'password':'ChangedPass123!','confirm':'ChangedPass123!'})
- ok(reset.status_code==302,'reset link changes password')
+ match=re.search(r'(?<![0-9])([0-9]{6})(?![0-9])',body_text);ok(bool(match),'SMTP delivers six-digit code')
+ code=match[1]; form={'code':code,'password':'ChangedPass123!','confirm':'ChangedPass123!'}
+ ok(post(b,'dat-lai-mat-khau.php',form).status_code==200,'other session cannot use code')
+ wrong=dict(form,code=f'{(int(code)+1)%1000000:06d}')
+ ok(post(a,'dat-lai-mat-khau.php',wrong).status_code==200,'wrong code rejected')
+ ok(post(a,'dat-lai-mat-khau.php',form).status_code==302,'correct code changes password')
  ok(get(a,'suc-khoe.php').url.endswith('dang-nhap.php'),'password reset invalidates session')
- ok(post(a,'dat-lai-mat-khau.php?token='+token,{'token':token,'password':'ChangedPass123!','confirm':'ChangedPass123!'}).status_code==200,'reset token cannot be reused')
+ ok(post(a,'dat-lai-mat-khau.php',form).status_code==200,'used code rejected')
  ok(post(a,'dang-nhap.php',{'email':'a@example.test','password':'ChangedPass123!','role':'user'}).status_code==302,'login with changed password')
+ # Exhaust the attempt budget, then verify that the genuine code is rejected.
+ ok(post(b,'quen-mat-khau.php',{'email':'b@example.test'}).status_code==200,'request a second fixture code')
+ def last_code():
+  msg=BytesParser(policy=default).parsebytes(smtp_messages[-1]);return re.search(r'(?<![0-9])([0-9]{6})(?![0-9])',msg.get_content())[1]
+ code_b=last_code()
+ for _ in range(5): assert post(b,'dat-lai-mat-khau.php',dict(form,code=f'{(int(code_b)+1)%1000000:06d}')).status_code==200
+ ok(post(b,'dat-lai-mat-khau.php',dict(form,code=code_b)).status_code==200,'correct code rejected after five failures')
+ c=requests.Session();post(c,'quen-mat-khau.php',{'email':'admin@example.test'});code_c=last_code()
+ age="$p=new PDO(getenv('HC_TEST_DSN'),getenv('HC_TEST_DB_USER'),getenv('HC_TEST_DB_PASS'));$p->exec('UPDATE password_resets SET expires_at=DATE_SUB(NOW(),INTERVAL 1 MINUTE)');"
+ subprocess.run(php+['-r',age],env=env,check=True)
+ ok(post(c,'dat-lai-mat-khau.php',dict(form,code=code_c)).status_code==200,'expired code rejected')
  # Restore fixture password for optional browser suite.
  restore_code="$p=new PDO(getenv('HC_TEST_DSN'),getenv('HC_TEST_DB_USER'),getenv('HC_TEST_DB_PASS'));$s=$p->prepare(\"UPDATE users SET password_hash=? WHERE email='a@example.test'\");$s->execute([password_hash('TestPass123!',PASSWORD_DEFAULT)]);"
  subprocess.run(php+['-r',restore_code],env=env,check=True)
