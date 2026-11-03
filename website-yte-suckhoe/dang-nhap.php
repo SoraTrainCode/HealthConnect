@@ -78,4 +78,4 @@ echo csrf();
 ?><input type="hidden" name="role" value="<?php echo e($portal); ?>"><?php
 input("email", "Email", $_POST["email"] ?? "", "email", true);
 input("password", "Mật khẩu", "", "password", true);
-?><button class="btn btn-brand">Đăng nhập</button> <a href="quen-mat-khau.php">Quên mật khẩu?</a></form><?php foot(); ?>
+?><button class="btn btn-brand">Đăng nhập</button> <a href="quen-mat-khau.php">Quên mật khẩu?</a></form><?php if ($portal === "user"): ?><p class="text-center mt-3 mb-0">Chưa có tài khoản? <a href="dang-ky.php">Đăng ký ngay</a></p><?php endif; foot(); ?>
