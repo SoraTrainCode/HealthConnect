@@ -43,4 +43,4 @@ $env:HC_BROWSER_SCRIPT = (Resolve-Path .\tests\browser.cjs).Path
 python tests/http_smoke.py
 ```
 
-Kiểm tra desktop/mobile, menu/chat, Service Worker, loại PHP/API khỏi cache và fallback ngoại tuyến. Không thay thế cài PWA trên điện thoại thật. Trước buổi bảo vệ, thực hiện [demo](../website-yte-suckhoe/docs/DEMO.md) với SMTP/AI thật nếu có và [checklist](../KE_HOACH_HOAN_THIEN.md). Các [kết quả cũ](../website-yte-suckhoe/docs/KIEM_TRA_FINAL.md) chỉ áp dụng phiên bản ghi trong tài liệu.
+Kiểm tra desktop/mobile, menu/chat, Service Worker, loại PHP/API khỏi cache và fallback ngoại tuyến. Không thay thế cài PWA trên điện thoại thật. Trước buổi bảo vệ, thực hiện [demo và checklist](../website-yte-suckhoe/docs/DEMO.md#checklist-trước-khi-nộp) với SMTP/AI thật nếu có. Các [kết quả lưu trữ](../website-yte-suckhoe/docs/KIEM_TRA_FINAL.md) chỉ áp dụng phiên bản ghi trong tài liệu.
