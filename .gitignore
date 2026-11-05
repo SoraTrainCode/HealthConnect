@@ -15,3 +15,6 @@ config.local.php
 *.p12
 *.pfx
 secrets/
+website-yte-suckhoe/check-ai.php
+website-yte-suckhoe/test-groq.php
+website-yte-suckhoe/test-models.php
