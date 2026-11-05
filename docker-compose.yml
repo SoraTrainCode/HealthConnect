@@ -1,0 +1,57 @@
+name: healthconnect
+
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      HC_DB_HOST: db
+      HC_DB_PORT: "3306"
+      HC_DB_NAME: healthconnect_moi
+      HC_DB_USER: healthconnect
+      HC_DB_PASSWORD: ${HC_DB_PASSWORD:?Create a private .env as described in DOCKER.md}
+      HC_APP_URL: ${HC_APP_URL:-http://localhost:8080}
+      HC_SETUP_KEY: ${HC_SETUP_KEY:?Create a private .env as described in DOCKER.md}
+      HC_AI_PROVIDER: ${HC_AI_PROVIDER:-}
+      HC_AI_API_KEY: ${HC_AI_API_KEY:-}
+      HC_AI_MODEL: ${HC_AI_MODEL:-}
+      HC_AI_URL: ${HC_AI_URL:-}
+      HC_OLLAMA_URL: ${HC_OLLAMA_URL:-http://127.0.0.1:11434/api/chat}
+      HC_OLLAMA_MODEL: ${HC_OLLAMA_MODEL:-qwen2.5:3b}
+      HC_MAIL_TRANSPORT: ${HC_MAIL_TRANSPORT:-mail}
+      HC_MAIL_FROM: ${HC_MAIL_FROM:-no-reply@example.com}
+      HC_SMTP_HOST: ${HC_SMTP_HOST:-}
+      HC_SMTP_PORT: ${HC_SMTP_PORT:-587}
+      HC_SMTP_USERNAME: ${HC_SMTP_USERNAME:-}
+      HC_SMTP_PASSWORD: ${HC_SMTP_PASSWORD:-}
+      HC_SMTP_SECURITY: ${HC_SMTP_SECURITY:-tls}
+      HC_SMTP_AUTH: ${HC_SMTP_AUTH:-1}
+    volumes:
+      - uploads:/var/www/html/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: healthconnect_moi
+      MARIADB_USER: healthconnect
+      MARIADB_PASSWORD: ${HC_DB_PASSWORD:?Create a private .env as described in DOCKER.md}
+      MARIADB_ROOT_PASSWORD: ${HC_DB_ROOT_PASSWORD:?Create a private .env as described in DOCKER.md}
+    volumes:
+      - database:/var/lib/mysql
+      - ./website-yte-suckhoe/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  database:
+  uploads:
