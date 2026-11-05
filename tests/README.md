@@ -36,6 +36,14 @@ python tests/http_smoke.py
 
 Test tạo bản sao source và database `healthconnect_http_<ngẫu nhiên>`, chạy PHP server ở cổng localhost tạm, tạo SMTP/Ollama giả lập cục bộ và dọn khi xong. Không gửi email ra Internet. Test SMTP chứng minh luồng gửi và reset token, không chứng minh hộp thư thật đã nhận. Test Ollama chứng minh request/persistence, không đánh giá model thật.
 
+## Chatbot cloud và fallback Ollama ở chế độ khách
+
+```sh
+python tests/cloud_chat.py
+```
+
+Cần PHP với curl/mbstring và Python requests; không cần database, API key thật hoặc dịch vụ ngoài. Test dùng bản sao ứng dụng tạm, không đọc `config.local.php` thật. AI giả lập trên localhost kiểm tra Groq/Gemini (Bearer, model mặc định/ghi đè và định dạng OpenAI), Ollama mặc định cũ, HTTP 429, thiếu key, provider lạ, phản hồi lỗi/rỗng, che key trong log, CSRF, chống spam và lịch sử guest. Các kết quả này không chứng minh API key hay nhà cung cấp thật hoạt động.
+
 ## Trình duyệt tùy chọn
 
 ```sh

@@ -11,6 +11,14 @@ return [
     // URL Ollama trên MÁY CHẠY PHP, không phải máy khách.
     "ollama_url" => "http://127.0.0.1:11434/api/chat",
     "ollama_model" => "qwen2.5:3b",
+    // groq | gemini; trống hoặc ollama dùng Ollama như trước.
+    "ai_provider" => "",
+    // Chỉ điền khóa thật trong config.local.php, không điền tại đây.
+    "ai_api_key" => "",
+    // Trống để dùng model mặc định của nhà cung cấp cloud.
+    "ai_model" => "",
+    // Trống để dùng endpoint mặc định của nhà cung cấp cloud.
+    "ai_url" => "",
     // URL cơ sở của website.
     "app_url" => "http://localhost/HealthConnect/website-yte-suckhoe",
     "mail_from" => "no-reply@example.com",

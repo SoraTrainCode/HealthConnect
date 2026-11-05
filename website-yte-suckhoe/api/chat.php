@@ -58,29 +58,78 @@ $messages = array_merge(
 if (!function_exists("curl_init")) {
     reply(["error" => "Máy chủ PHP chưa bật extension curl."], 503);
 }
-$ch = curl_init(cfg("ollama_url"));
+$provider = strtolower(trim(cfg("ai_provider")));
+if ($provider === "") {
+    $provider = "ollama";
+}
+if (!in_array($provider, ["ollama", "groq", "gemini"], true)) {
+    reply(["error" => "Nhà cung cấp AI chưa được hỗ trợ. Kiểm tra cấu hình chatbot."], 503);
+}
+$headers = ["Content-Type: application/json"];
+$apiKey = cfg("ai_api_key");
+if ($provider === "ollama") {
+    $modelUrl = cfg("ollama_url");
+    $model = cfg("ollama_model");
+} else {
+    if (trim($apiKey) === "") {
+        reply(["error" => "Chưa cấu hình ai_api_key cho chatbot trong config.local.php."], 503);
+    }
+    $modelUrl = trim(cfg("ai_url")) ?: ($provider === "groq"
+        ? "https://api.groq.com/openai/v1/chat/completions"
+        : "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions");
+    $model = trim(cfg("ai_model")) ?: ($provider === "groq"
+        ? "llama-3.3-70b-versatile"
+        : "gemini-2.5-flash");
+    $headers[] = "Authorization: Bearer " . $apiKey;
+}
+$ch = curl_init($modelUrl);
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
+    CURLOPT_HTTPHEADER => $headers,
     CURLOPT_POSTFIELDS => json_encode([
-        "model" => cfg("ollama_model"),
+        "model" => $model,
         "messages" => $messages,
         "stream" => false,
     ]),
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_CONNECTTIMEOUT => 5,
-    CURLOPT_TIMEOUT => 90,
+    CURLOPT_TIMEOUT => 60,
 ]);
 $response = curl_exec($ch);
 $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 curl_close($ch);
 $data = json_decode((string) $response, true);
-$answer = $data["message"]["content"] ?? "";
+$answer = $provider === "ollama"
+    ? ($data["message"]["content"] ?? "")
+    : ($data["choices"][0]["message"]["content"] ?? "");
+if ($code === 429) {
+    reply(["error" => "Đã chạm giới hạn miễn phí của dịch vụ AI. Vui lòng chờ khoảng 1 phút rồi thử lại."], 429);
+}
 if ($code !== 200 || !is_string($answer) || trim($answer) === "") {
+    // Chuẩn hóa JSON và che khóa cả ở dạng thô, JSON escape hoặc URL encode.
+    $loggedResponse = (string) $response;
+    $decodedResponse = json_decode($loggedResponse, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        $loggedResponse = (string) json_encode($decodedResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    if ($apiKey !== "") {
+        $keyVariants = [$apiKey, rawurlencode($apiKey), urlencode($apiKey)];
+        foreach ([0, JSON_UNESCAPED_SLASHES, JSON_UNESCAPED_UNICODE, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES] as $flags) {
+            $encodedKey = json_encode($apiKey, $flags);
+            if (is_string($encodedKey)) {
+                $keyVariants[] = substr($encodedKey, 1, -1);
+            }
+        }
+        $loggedResponse = str_replace($keyVariants, "[REDACTED]", $loggedResponse);
+    }
+    error_log("Chatbot provider=" . $provider . " HTTP=" . $code . " response=" . json_encode(
+        substr($loggedResponse, 0, 4000),
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE,
+    ));
     reply(
         [
             "error" =>
-                "Chưa kết nối được trợ lý. Kiểm tra Ollama và model trên máy chủ.",
+                "Chưa kết nối được trợ lý. Vui lòng thử lại sau.",
         ],
         503,
     );
