@@ -1,10 +1,8 @@
 # Kiểm thử HealthConnect
 
-Ứng dụng chỉ cần PHP/MySQL để chạy. Python/Node là công cụ phát triển tùy chọn cho bộ kiểm thử HTTP/trình duyệt.
+Chạy từ gốc repo. Cần PHP 8.1+ với các extension của [ứng dụng](../website-yte-suckhoe/HUONG_DAN.md); Python/Node chỉ phục vụ kiểm thử.
 
 ## PHP và database
-
-Từ gốc repo:
 
 ```sh
 php tests/appointments.php
@@ -12,60 +10,37 @@ php tests/news.php
 php tests/database.php
 ```
 
-`appointments.php` kiểm tra ngày/giờ và chuyển trạng thái. `news.php` kiểm tra RSS/Atom, URL không an toàn, namespace ảnh và XML lỗi. `database.php` tạo database mới `healthconnect_test_<ngẫu nhiên>`, kiểm tra schema/migration lặp lại/giữ dữ liệu cũ, sức chứa, trùng giờ, lịch bác sĩ/ngày nghỉ, nhật ký và concurrency, rồi xóa DB thử.
+Hai suite đầu kiểm tra quy tắc lịch và RSS/Atom. Suite database kiểm tra schema/migration, sức chứa, quyền và concurrency; cần `proc_open` và tài khoản có quyền CREATE/DROP DATABASE thử. Mặc định `127.0.0.1:3306`, root, mật khẩu trống. Ghi đè bằng `HC_TEST_DB_HOST`, `HC_TEST_DB_PORT`, `HC_TEST_DB_USER`, `HC_TEST_DB_PASS` trong môi trường cục bộ, không commit giá trị bí mật.
 
-Mặc định kết nối `127.0.0.1:3306`, root, mật khẩu trống. Ghi đè bằng `HC_TEST_DB_HOST`, `HC_TEST_DB_PORT`, `HC_TEST_DB_USER`, `HC_TEST_DB_PASS`. Dùng tài khoản test có quyền CREATE/DROP DATABASE, không dùng tài khoản production. Script không đọc config.local của ứng dụng. Concurrency cần `proc_open`.
-
-Windows CMD ví dụ:
-
-```bat
-set HC_TEST_DB_PORT=3306
-set HC_TEST_DB_USER=root
-C:\xampp\php\php.exe tests\database.php
-C:\xampp\php\php.exe tests\news.php
-```
-
-## HTTP, SMTP và Ollama giả lập
+## HTTP và AI cloud
 
 ```sh
 python -m pip install requests
 python tests/http_smoke.py
-```
-
-Đặt `HC_PHP_BIN` nếu PHP chưa có trong PATH; ví dụ `set HC_PHP_BIN=C:\xampp\php\php.exe`. Có thể đặt `HC_PHP_INI` để chọn php.ini riêng. Các biến database giống phía trên.
-
-Test tạo bản sao source và database `healthconnect_http_<ngẫu nhiên>`, chạy PHP server ở cổng localhost tạm, tạo SMTP/Ollama giả lập cục bộ và dọn khi xong. Không gửi email ra Internet. Test SMTP chứng minh luồng gửi và reset token, không chứng minh hộp thư thật đã nhận. Test Ollama chứng minh request/persistence, không đánh giá model thật.
-
-## Chatbot cloud và fallback Ollama ở chế độ khách
-
-```sh
 python tests/cloud_chat.py
 ```
 
-Cần PHP với curl/mbstring và Python requests; không cần database, API key thật hoặc dịch vụ ngoài. Test dùng bản sao ứng dụng tạm, không đọc `config.local.php` thật. AI giả lập trên localhost kiểm tra Groq/Gemini (Bearer, model mặc định/ghi đè và định dạng OpenAI), Ollama mặc định cũ, HTTP 429, thiếu key, provider lạ, phản hồi lỗi/rỗng, che key trong log, CSRF, chống spam và lịch sử guest. Các kết quả này không chứng minh API key hay nhà cung cấp thật hoạt động.
+- `http_smoke.py`: luồng tài khoản/quyền, sức khỏe, lịch, nội dung/ảnh, email và chat. Dùng SMTP/Ollama giả lập, nhận cùng biến DB phía trên.
+- `cloud_chat.py`: guest Groq/Gemini/Ollama, Bearer/model, 429/503, thiếu key, log che key, CSRF/spam/history. Không cần DB hay key thật.
+- Đặt `HC_PHP_BIN` nếu PHP chưa có trong PATH; `HC_PHP_INI` chọn php.ini riêng.
+
+Các suite DB tạo/xóa database ngẫu nhiên `healthconnect_test_*` hoặc `healthconnect_http_*`. HTTP/AI dùng bản sao source tạm và không đọc config.local.php của ứng dụng. Không dùng tài khoản production; kết quả mock không chứng minh thư thật hoặc model thật hoạt động.
 
 ## Trình duyệt tùy chọn
 
+Cài Node/Playwright tại gốc repo, không lưu dependency/lockfile vào dự án:
+
 ```sh
-npm install --no-save playwright
+npm install --no-save --package-lock=false playwright
 npx playwright install chromium
 ```
 
-Sau đó bật `HC_BROWSER_TEST=1` và đặt `HC_BROWSER_SCRIPT` là đường dẫn tuyệt đối tới `tests/browser.cjs` trước khi chạy http_smoke.py. Ví dụ Windows:
+Ví dụ PowerShell:
 
-```bat
-set HC_BROWSER_TEST=1
-set HC_BROWSER_SCRIPT=D:\duong-dan\HealthConnect\tests\browser.cjs
-python tests\http_smoke.py
+```powershell
+$env:HC_BROWSER_TEST = "1"
+$env:HC_BROWSER_SCRIPT = (Resolve-Path .\tests\browser.cjs).Path
+python tests/http_smoke.py
 ```
 
-Kiểm tra màn hình desktop/mobile, không tràn ngang toàn trang, menu, chat toggle, service worker, loại trừ cache dữ liệu riêng tư và ngoại tuyến. Không thay thế thử cài PWA trên điện thoại thật qua HTTPS. Bộ này không cần chạy để người dùng sử dụng website.
-
-## Kiểm tra trước khi demo
-
-- Cài mới và nâng cấp bản sao DB thật trên XAMPP.
-- Ghi BMI/nhật ký bằng hai tài khoản; xác nhận tách dữ liệu.
-- Đặt/xác nhận/hủy lịch; kiểm tra khung giờ đầy, ngày nghỉ và mở lại lịch.
-- Thêm bài viết có ảnh tải lên, sửa lại bài, tìm kiếm và xem công khai.
-- Cấu hình SMTP thật, Ollama thật và URL HTTPS; thử từ điện thoại.
-- Đối chiếu kết quả trong `docs/KIEM_TRA_FINAL.md`; các báo cáo phiên bản cũ chỉ là lịch sử.
+Kiểm tra desktop/mobile, menu/chat, Service Worker, loại PHP/API khỏi cache và fallback ngoại tuyến. Không thay thế cài PWA trên điện thoại thật. Trước buổi bảo vệ, thực hiện [demo](../website-yte-suckhoe/docs/DEMO.md) với SMTP/AI thật nếu có và [checklist](../KE_HOACH_HOAN_THIEN.md). Các [kết quả cũ](../website-yte-suckhoe/docs/KIEM_TRA_FINAL.md) chỉ áp dụng phiên bản ghi trong tài liệu.

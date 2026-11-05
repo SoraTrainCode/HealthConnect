@@ -1,46 +1,29 @@
-# Đưa bản hoàn thiện vào GitHub nhóm
+# Làm việc với Git
 
-Bản này dựa trên `main` commit `a4c67a7` và đã giữ phần RSS mới của nhóm. Chưa push tự động lên GitHub. Gói ZIP có toàn bộ source cùng `HealthConnect-final.patch` nằm ngoài thư mục source.
+Chạy tại gốc repo. Nếu đã có bản clone thì dùng bản đó, không clone thêm vào bên trong.
 
-## Cách khuyến nghị: áp dụng patch vào repo đang clone
+## Cập nhật code
 
-Giải nén ZIP ở một thư mục riêng, ví dụ `D:\Downloads\HealthConnect-Final`. Không thay/xóa thư mục `.git` trong repo cũ.
-
-Mở CMD:
-
-```bat
-cd /d "D:\Thực Hành\HealthConnect\HealthConnect"
+```sh
 git status
+git switch main
+git pull --ff-only origin main
 ```
 
-Chỉ tiếp tục khi `working tree clean`. Nếu có code nhóm đang sửa dở, commit riêng hoặc sao lưu có chủ đích trước; không dùng restore/reset để xóa thay đổi.
+Nếu có thay đổi chưa lưu, lưu công việc có chủ đích trước khi cập nhật. Không reset, chép đè hoặc xóa `.git` để xử lý lỗi. Git không đồng bộ database, `config.local.php`, `.env` hay ảnh upload giữa các máy; xem [hướng dẫn nâng cấp](website-yte-suckhoe/HUONG_DAN.md#nâng-cấp-và-sao-lưu) khi cần đổi schema.
 
-```bat
-git fetch origin
-git switch -c trong/healthconnect-final origin/main
-git apply --check "D:\Downloads\HealthConnect-Final\HealthConnect-final.patch"
-git apply "D:\Downloads\HealthConnect-Final\HealthConnect-final.patch"
+## Gửi thay đổi
+
+```sh
+git switch -c ten-nhanh
+git diff
 git status
+git add duong-dan-file-can-gui
+git diff --cached
+git commit -m "Mo ta thay doi"
+git push -u origin ten-nhanh
 ```
 
-Đổi đường dẫn patch theo nơi thực tế cậu giải nén. Nếu `--check` báo lỗi, **dừng trước lệnh apply**: main có thể đã thay đổi hoặc đã có một phần bản sửa; gửi lỗi để ghép đúng. Không chép đè toàn bộ bản cũ lên code mới của bạn cùng nhóm.
+Thay tên nhánh/đường dẫn bằng giá trị thực tế. Chỉ stage file đã kiểm tra; không commit mật khẩu, API key, cấu hình riêng, backup DB hoặc dữ liệu upload.
 
-Tiếp theo:
-
-1. Sao lưu database; import `website-yte-suckhoe/database/upgrade_final.sql` vào đúng DB. Máy mới dùng schema.sql.
-2. Chạy doctor.php, các test cần thiết và demo chức năng chính theo README.
-3. Xem `git diff --stat` và đảm bảo không có config.local, mật khẩu, SQL backup hay uploads người dùng trong commit.
-
-```bat
-git add .
-git commit -m "Complete HealthConnect health tracking, doctor booking and mobile PWA"
-git push -u origin trong/healthconnect-final
-```
-
-Trên GitHub chọn Compare & pull request, base `main`, compare `trong/healthconnect-final`. Hai người xem thay đổi và kết quả CI rồi merge. Không force push lên main.
-
-## Source đầy đủ trong ZIP dùng để làm gì?
-
-Thư mục `HealthConnect/` đủ để chạy riêng theo README. Nó không chứa `.git`, config.local hoặc dữ liệu cá nhân. Nếu chỉ muốn xem code/chạy thử, dùng thư mục này và tạo config riêng.
-
-Nếu muốn đưa code vào repo đã có lịch sử, ưu tiên patch phía trên. Sau merge, người còn lại cập nhật repo và chạy cùng migration. Git không tự đồng bộ database hoặc config.local giữa hai máy.
+Mở Pull Request vào `main`, ghi thay đổi và [kết quả kiểm thử](tests/README.md), rồi để thành viên nhóm duyệt. Không force-push hoặc tự merge khi chưa được đồng ý.

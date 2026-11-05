@@ -1,27 +1,48 @@
 # Kiến trúc HealthConnect
 
-## Luồng ứng dụng
+## Frontend, backend và database nối với nhau thế nào?
 
-Trình duyệt gửi GET để xem trang, POST để thay đổi dữ liệu. File PHP nạp bootstrap (session, cấu hình, PDO, CSRF), kiểm tra quyền, truy vấn database rồi render HTML bằng layout. JavaScript bổ sung biểu đồ, chat, menu và cài PWA. Không có frontend server riêng.
+```mermaid
+flowchart LR
+    UI["Trình duyệt: HTML/CSS/JavaScript"] <-->|"HTTP: form GET/POST hoặc fetch JSON"| PHP["Backend PHP"]
+    PHP <-->|"PDO + pdo_mysql: truy vấn SQL"| DB[(MySQL / MariaDB)]
+    PHP <-->|"cURL: HTTP/JSON"| AI["Groq / Gemini / Ollama"]
+    PHP -->|"PHPMailer: SMTP"| MAIL["Máy chủ email"]
+```
 
-Chat dùng JSON: trình duyệt → api/chat.php → Ollama trên máy chủ → lưu hội thoại đúng user → JSON về trình duyệt. RSS dùng HTTPS XML bên ngoài và cache file. Email dùng PHPMailer tới SMTP được cấu hình.
+PHP chạy trên server và trả HTML/JSON về trình duyệt. Trình duyệt không kết nối database trực tiếp. `includes/bootstrap.php` nạp `config.local.php` và tạo kết nối PDO từ host/port/database/user/password; `includes/layout.php` tạo HTML chung, còn CSS/JavaScript xử lý hiển thị và tương tác.
 
-## Phân công theo thư mục
-
-| Vị trí | Trách nhiệm |
+| Thành phần | Công nghệ đang dùng |
 |---|---|
-| includes/bootstrap.php | Cấu hình riêng, kết nối PDO, session, CSRF, xác thực, escape/sanitize |
-| includes/appointments.php | Quy tắc lịch, transaction, khóa chung, kiểm tra sức chứa và nhật ký trạng thái |
-| includes/layout.php + assets/css/app.css | Khung giao diện desktop/mobile |
-| suc-khoe.php, bmi.php, xuat-du-lieu.php | Dữ liệu sức khỏe theo chủ sở hữu |
-| bac-si.php, dat-lich.php, phieu-hen.php | Chọn bác sĩ, đặt lịch, xem/in/xuất phiếu |
-| admin/ | Quản trị; luôn kiểm tra role phía PHP |
-| includes/news_sync.php | Tải RSS/Atom, làm sạch nội dung, TTL/cache/lock |
-| includes/mailer.php | Gửi email bằng PHPMailer, không lộ thông tin bí mật ra trình duyệt |
-| manifest.webmanifest, sw.js | Cài PWA và cache tài nguyên công khai |
-| database/schema.sql, upgrade_final.sql | Cài mới và nâng cấp có giữ dữ liệu |
+| Frontend | HTML, CSS, JavaScript và Bootstrap |
+| Backend | PHP thuần, không dùng Laravel |
+| Frontend ↔ backend | HTTP: form GET/POST; `fetch()` nhận JSON cho chat/API |
+| Backend ↔ database | PDO với driver `pdo_mysql`, truy vấn SQL tới MySQL/MariaDB |
+| Web server khi dùng XAMPP | Apache chạy PHP; MySQL là dịch vụ database riêng |
 
-## Dữ liệu tài khoản và sức khỏe
+Ví dụ đặt lịch: form ở `dat-lich.php` gửi POST kèm CSRF → PHP kiểm tra tài khoản/dữ liệu → `appt_book()` dùng PDO/transaction để ghi MySQL → chuyển tới `phieu-hen.php` và render kết quả. Chat dùng `fetch()` trong `assets/js/chatbot-php.js` tới `api/chat.php`; key AI chỉ được dùng phía PHP.
+
+## Dịch vụ tích hợp
+
+- Chat: trình duyệt → `api/chat.php` → Groq/Gemini/Ollama → thêm khuyến cáo → lưu DB hoặc guest session → JSON. `ai_provider` rỗng dùng Ollama; cloud lỗi không tự đổi provider.
+- RSS: PHP tải HTTPS/XML → làm sạch → cache tệp theo TTL và khóa đồng bộ → trang tin/API JSON.
+- Quên mật khẩu: PHPMailer gửi mã 6 số; DB giữ bản băm HMAC, session giữ challenge. Mã hạn 15 phút, tối đa 5 lần thử và dùng một lần.
+- `api/new-chat.php` kiểm tra POST/CSRF và xóa guest history; giao diện đặt `session_id=0`. Phiên DB mới được tạo khi có đáp án hợp lệ tiếp theo.
+
+## Thành phần
+
+| Vị trí trong ứng dụng | Trách nhiệm |
+|---|---|
+| `includes/bootstrap.php`, `includes/layout.php` | Cấu hình, PDO, xác thực, CSRF, sanitize và giao diện chung |
+| `includes/appointments.php` | Quy tắc đặt lịch, transaction, khóa và nhật ký trạng thái |
+| `suc-khoe.php`, `bmi.php`, `xuat-du-lieu.php` | Dữ liệu sức khỏe theo chủ sở hữu |
+| `bac-si.php`, `dat-lich.php`, `phieu-hen.php` | Bác sĩ, đặt lịch, phiếu/ICS |
+| `admin/` | Quản trị, kiểm tra role phía PHP |
+| `includes/news_sync.php`, `includes/mailer.php`, `api/` | RSS, SMTP và các endpoint JSON |
+| `manifest.webmanifest`, `sw.js` | PWA và cache tĩnh |
+| `database/schema.sql`, `database/upgrade_final.sql` | Cài mới và nâng cấp |
+
+## Dữ liệu chính
 
 ```mermaid
 erDiagram
@@ -29,9 +50,11 @@ erDiagram
     users ||--o{ wellness_logs : records
     users ||--o| health_goals : sets
     users ||--o{ password_resets : requests
+    users ||--o{ chat_sessions : owns
+    chat_sessions ||--o{ chat_messages : contains
+    users ||--o{ articles : writes
+    categories ||--o{ articles : groups
 ```
-
-## Dữ liệu lịch khám
 
 ```mermaid
 erDiagram
@@ -42,19 +65,10 @@ erDiagram
     appointments ||--o{ appointment_events : records
 ```
 
-`appointments.doctor_id` cho phép NULL để giữ lịch cũ. Quan hệ bác sĩ và actor_id trong nhật ký là quan hệ logic, chưa áp foreign key trên dữ liệu lịch sử. Tài khoản còn lịch khám được giữ lại và có thể khóa thay vì xóa. doctors không bị xóa qua UI; dùng active để ngừng nhận lịch. appointment_mutex có một hàng để serialize mọi giao dịch thay đổi lịch ở quy mô đồ án.
+Các đường trong ERD thể hiện quan hệ dữ liệu. `appointments.user_id`, `appointments.doctor_id` và `appointment_events.actor_id` là quan hệ logic, chưa có FK trong schema. `doctor_id` cho phép NULL để giữ lịch cũ. `login_attempts` lưu bộ đếm theo khóa băm; `appointment_mutex` có hàng `id=1` dùng để khóa giao dịch.
 
-Các bảng còn lại: categories → articles; users → articles (tác giả); users → chat_sessions → chat_messages; login_attempts lưu số lần đăng nhập sai theo khóa băm.
-
-## Vì sao khóa trước khi đếm chỗ?
-
-Nếu hai request cùng đếm rồi chèn, cả hai có thể thấy “còn một chỗ”. Mọi đường ghi lịch đều lấy cùng mutex bằng `SELECT ... FOR UPDATE` trong transaction, sau đó đếm/kiểm tra/chèn rồi commit. Request sau chỉ được kiểm tra khi request trước đã xong. Khi mở rộng tải, thay bằng khóa theo bác sĩ/slot và user với thứ tự khóa thống nhất; bản hiện tại ưu tiên tính đúng và dễ giải thích.
+Mọi đường ghi lịch lấy mutex bằng `SELECT ... FOR UPDATE` trước khi đếm/kiểm tra/chèn rồi commit; lỗi thì rollback. Quy mô đồ án dùng khóa chung để ưu tiên tính đúng; mở rộng tải cần đo đạc và đánh giá khóa theo bác sĩ/khung giờ.
 
 ## Bảo vệ dữ liệu
 
-- Prepared statements cho giá trị nhập; escape HTML đầu ra; nội dung bài viết theo allowlist.
-- POST + CSRF cho thao tác ghi; quyền admin và chủ sở hữu kiểm tra phía PHP.
-- Mật khẩu băm, cookie HttpOnly/SameSite, session đổi ID sau login; đổi mật khẩu làm phiên cũ mất hiệu lực.
-- Upload giới hạn định dạng/MIME/kích thước và chặn thực thi PHP.
-- Cache PWA chỉ chứa file tĩnh công khai. Cache RSS không chứa dữ liệu sức khỏe cá nhân.
-- Hệ thống chưa phải hồ sơ bệnh án hay phần mềm phòng khám đã được chứng nhận; dữ liệu mẫu dùng cho học tập.
+PDO prepared statements, mật khẩu băm, CSRF, role/owner checks, escape/sanitize và kiểm tra ảnh được thực hiện ở server. Đổi mật khẩu làm phiên cũ mất hiệu lực. Cấu hình/key nằm ngoài Git; log lỗi AI che key, giới hạn chống spam hiện theo session. Service Worker không cache PHP/API/uploads. Xem [thư viện và nguồn dữ liệu](THIRD_PARTY.md).
