@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+# Giữ xuống dòng LF để heredoc chạy trên Linux khi checkout từ Windows.
 FROM php:8.2-apache-bookworm
 
 # CA của proxy chỉ được mount lúc build, không được lưu vào image.
