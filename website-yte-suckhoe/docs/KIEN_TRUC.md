@@ -4,7 +4,7 @@
 
 Trình duyệt gửi GET để xem trang, POST để thay đổi dữ liệu. File PHP nạp bootstrap (session, cấu hình, PDO, CSRF), kiểm tra quyền, truy vấn database rồi render HTML bằng layout. JavaScript bổ sung biểu đồ, chat, menu và cài PWA. Không có frontend server riêng.
 
-Chat dùng JSON: trình duyệt → api/chat.php → Ollama trên máy chủ → lưu hội thoại đúng user → JSON về trình duyệt. RSS dùng HTTPS XML bên ngoài và cache file. Email dùng PHPMailer tới SMTP được cấu hình.
+Chat dùng JSON: trình duyệt → api/tro-ly.php → Ollama trên máy chủ → lưu hội thoại đúng user → JSON về trình duyệt. RSS dùng HTTPS XML bên ngoài và cache file. Email dùng PHPMailer tới SMTP được cấu hình.
 
 ## Phân công theo thư mục
 

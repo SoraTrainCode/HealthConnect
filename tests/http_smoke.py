@@ -140,9 +140,9 @@ try:
  ok(result.status_code==200 and 'Không thể xóa danh mục đang có bài viết' in result.text,'category with articles cannot be deleted')
  # Mocked Ollama: production PHP request, real persistence, no external model call.
  page=get(a,'suc-khoe.php');csrf=re.search(r'name="csrf" value="([^"]+)"',page.text)[1]
- reply=a.post(url+'api/chat.php',json={'message':'Demo health question'},headers={'X-CSRF-Token':csrf},timeout=10)
+ reply=a.post(url+'api/tro-ly.php',json={'message':'Demo health question'},headers={'X-CSRF-Token':csrf},timeout=10)
  ok(reply.status_code==200 and 'MOCK HEALTH RESPONSE' in reply.json()['answer'],'Ollama API contract and chat persistence')
- sid=reply.json()['session_id'];ok('MOCK HEALTH RESPONSE' in get(a,'lich-su-chat.php?id='+str(sid)).text,'chat history saved')
+ sid=reply.json()['session_id'];ok('MOCK HEALTH RESPONSE' in get(a,'lich-su-tro-chuyen.php?id='+str(sid)).text,'chat history saved')
  # Reset password through local SMTP capture; no real email leaves this test.
  ok(post(a,'quen-mat-khau.php',{'email':'a@example.test'}).status_code==200,'reset request HTTP')
  from email.parser import BytesParser
