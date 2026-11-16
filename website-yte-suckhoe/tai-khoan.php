@@ -125,4 +125,4 @@ input("avatar_url", "Đường dẫn ảnh đại diện", $u["avatar_url"], "ur
 input("old_password", "Mật khẩu hiện tại", "", "password", true);
 input("password", "Mật khẩu mới", "", "password", true);
 input("confirm", "Nhập lại mật khẩu mới", "", "password", true);
-?><button class="btn btn-brand">Đổi mật khẩu</button></form><div class="mt-4"><a class="btn btn-outline-brand" href="bmi.php">Lịch sử và biểu đồ BMI</a> <a class="btn btn-outline-brand" href="lich-su-chat.php">Lịch sử chatbot</a></div></div></div><script>document.getElementById('default_height').step='0.1';</script><?php foot(); ?>
+?><button class="btn btn-brand">Đổi mật khẩu</button></form><div class="mt-4"><a class="btn btn-outline-brand" href="bmi.php">Lịch sử và biểu đồ BMI</a> <a class="btn btn-outline-brand" href="lich-su-tro-chuyen.php">Lịch sử chatbot</a></div></div></div><script>document.getElementById('default_height').step='0.1';</script><?php foot(); ?>

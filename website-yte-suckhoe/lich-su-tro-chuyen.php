@@ -8,7 +8,7 @@ if (post()) {
         $u["id"],
     ]);
     flash("Đã xóa hội thoại.");
-    redirect("lich-su-chat.php");
+    redirect("lich-su-tro-chuyen.php");
 }
 $sid = (int) ($_GET["id"] ?? 0);
 $sessions = query(
