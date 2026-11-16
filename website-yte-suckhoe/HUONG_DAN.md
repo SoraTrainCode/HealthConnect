@@ -1,110 +1,82 @@
-# Hướng dẫn chạy HealthConnect
+# Cài đặt và cấu hình HealthConnect
 
-## 1. Yêu cầu
+## Chạy bằng Apache/XAMPP
 
-PHP 8.1 trở lên; MySQL 8 hoặc MariaDB 10.4 trở lên; các extension pdo_mysql, mbstring, curl, dom, fileinfo, SimpleXML, openssl. XAMPP có thể cung cấp PHP/Apache/MariaDB. Bootstrap và PHPMailer đã nằm trong source, không cần npm/composer để chạy web.
+1. Copy thư mục ứng dụng vào `C:\xampp\htdocs\HealthConnect` để `index.php` nằm trực tiếp bên trong. Nếu XAMPP ở `C:\xampppp`, đổi đường dẫn tương ứng.
+2. Bật Apache. Dùng MySQL/MariaDB đang có hoặc bật MySQL của XAMPP; không chạy hai dịch vụ trên cùng cổng 3306.
+3. Với DB mới, mở `database/schema.sql` trong MySQL Workbench hoặc import qua phpMyAdmin, thực thi một lần. Script tạo `healthconnect_moi` với 16 bảng. DB có dữ liệu: dùng mục [nâng cấp](#nâng-cấp-và-sao-lưu).
+4. Copy toàn bộ `config.example.php` thành `config.local.php` **nếu chưa có**. Sửa bản local, không ghi đè cấu hình đã điền.
 
-Mọi trang chính chạy qua PHP. HTML/CSS/JS là giao diện được PHP trả về trình duyệt; không chạy một frontend server riêng. Các file `.html` cũ chỉ chuyển sang trang PHP tương ứng.
+| Mục cấu hình | Giá trị cần điền |
+|---|---|
+| `db_host`, `db_port` | Thường là `127.0.0.1`, `3306`; khớp MySQL thực tế |
+| `db_name` | `healthconnect_moi` |
+| `db_user`, `db_pass` | Tài khoản/mật khẩu MySQL, khác tài khoản admin website |
+| `setup_key` | Tự đặt khóa riêng ít nhất 16 ký tự để tạo admin lần đầu |
+| `app_url` | `http://localhost/HealthConnect`, thêm cổng nếu Apache dùng cổng khác |
 
-## 2. Cài mới
+Nếu đặt cả repo trong `htdocs/HealthConnect`, URL ứng dụng là `http://localhost/HealthConnect/website-yte-suckhoe`; `app_url` phải khớp. Sửa cấu hình ở thư mục Apache đang phục vụ, cùng chỗ với `index.php`.
 
-1. Giải nén source vào thư mục riêng hoặc dùng repo đã clone. Không tạo thêm repo lồng vào repo hiện có.
-2. Bật MySQL và Apache trong XAMPP, vào phpMyAdmin.
-3. Import `database/schema.sql` một lần. Database mặc định tên `healthconnect_moi`, có 16 bảng. Nếu đã có DB cùng tên và có dữ liệu, dùng quy trình nâng cấp ở mục 3.
-4. Copy `config.example.php` thành `config.local.php`. Chỉnh db_host, db_port, db_name, db_user, db_pass theo XAMPP.
-5. Đặt setup_key thành chuỗi riêng dài ít nhất 16 ký tự. Đặt app_url đúng cách chạy; ví dụ server PHP bên dưới là `http://localhost:8000`.
-6. Mở CMD tại thư mục `website-yte-suckhoe`:
+Chạy từ PowerShell để kiểm tra, thay đường dẫn nếu cần:
 
-```bat
-C:\xampp\php\php.exe tools\doctor.php
-C:\xampp\php\php.exe -S localhost:8000 -t . tools/router.php
+```powershell
+& C:\xampp\php\php.exe C:\xampp\htdocs\HealthConnect\tools\doctor.php
 ```
 
-7. Mở `http://localhost:8000/setup.php`. Nhập khóa vừa đặt và tài khoản admin tự chọn. Chọn dữ liệu mẫu để có bài viết và 8 bác sĩ giả lập thuộc 8 chuyên khoa với lịch tuần.
-8. Setup tự khóa khi đã có admin. Có thể xóa/vô hiệu hóa setup.php trên hosting. Đăng nhập admin ở `dang-nhap.php?role=admin`, user ở `dang-nhap.php?role=user`.
-9. Mở `index.php`, đăng ký một tài khoản người dùng để demo. Không có mật khẩu admin dùng chung/hardcode.
+Yêu cầu PHP 8.1+, MySQL 8/MariaDB 10.4+, extensions `pdo_mysql`, `mbstring`, `curl`, `dom`, `fileinfo`, `SimpleXML`, `openssl`. Sửa `php.ini` thì khởi động lại Apache. Bootstrap/PHPMailer đã có trong source.
 
-Chạy bằng Apache: đặt source trong `C:\xampp\htdocs\HealthConnect`, mở `http://localhost/HealthConnect/website-yte-suckhoe/`; app_url phải trỏ đúng địa chỉ đó. Nếu Apache dùng 8080, thêm `:8080`. Với cách này không cần chạy `php -S`.
+Mở `http://localhost/HealthConnect/setup.php`, nhập `setup_key`, tạo admin và chọn seed để có bài viết cùng 8 bác sĩ giả lập. Setup tự khóa khi đã có admin. Cổng admin là `dang-nhap.php?role=admin`; user có thể tự đăng ký.
 
-## 3. Nâng cấp bản đã có dữ liệu
+## Chatbot
 
-1. Export database đang dùng trong phpMyAdmin, giữ file sao lưu ngoài thư mục public và ngoài Git.
-2. Áp dụng bản code mới theo `HUONG_DAN_GIT.md`; giữ nguyên config.local.php và ảnh uploads của máy cậu.
-3. Trong phpMyAdmin **chọn đúng database của dự án**, import `database/upgrade_final.sql`. Script không chọn tên DB cố định, không DROP/TRUNCATE dữ liệu; có thể chạy lại.
-4. Script thêm bác sĩ, lịch tuần, ngày nghỉ, nhật ký lịch hẹn, nhật ký sức khỏe, mục tiêu và cột doctor_id. Lịch cũ giữ doctor_id=NULL và hiển thị “Tiếp nhận chung”.
-5. Chạy `php tools/doctor.php`. Nếu chưa có bác sĩ, đăng nhập admin → Bác sĩ → “Tạo 8 hồ sơ giả lập”, hoặc nhập thủ công. Chỉ tạo mẫu khi danh sách bác sĩ đang trống.
-6. Kiểm tra tài khoản, bài viết và lịch cũ trước khi tiếp tục demo. Nếu lỗi nâng cấp, không import schema cài mới đè lên DB hiện tại; kiểm tra thông báo SQL và bản sao lưu.
-
-## 4. Sử dụng các chức năng
-
-**Người dùng:** đăng ký/đăng nhập → Sức khỏe → ghi BMI, nhật ký theo ngày, mục tiêu; xem lịch sắp tới; tải CSV. Nhật ký cùng ngày được cập nhật thay vì tạo trùng. Có thể sửa/xóa các bản ghi của mình.
-
-**Đặt lịch:** xem Bác sĩ → chọn ngày trong 30 ngày → chọn giờ còn chỗ → thông tin người khám → gửi. Mỗi bác sĩ có một chỗ/khung giờ; mỗi user tối đa 3 lịch tương lai. Một user không đặt trùng giờ ở hai bác sĩ. Ngày nghỉ không nhận lịch. Yêu cầu ban đầu là “Chờ xác nhận”.
-
-**Admin:** Quản trị → Bác sĩ để cấu hình ngày/giờ và ngày nghỉ; Lịch khám để xem tổng quan ngày sắp tới, lọc ngày/trạng thái/bác sĩ, xác nhận hoặc hủy. Không thay lịch tuần nếu bỏ giờ đã có lịch tương lai chưa xử lý. Ngừng nhận lịch mới giữ nguyên lịch đã đặt; cần chủ động xử lý chúng.
-
-**Trạng thái:** pending → confirmed/cancelled; confirmed → done/no_show/cancelled. done/no_show chỉ sau giờ hẹn. cancelled → pending chỉ nếu còn ở tương lai và qua lại đầy đủ kiểm tra. done/no_show không mở lại. User chỉ hủy lịch của mình khi chưa qua giờ và còn pending/confirmed.
-
-**Phiếu hẹn:** xem chi tiết/lịch sử, in, tải ICS. File ICS là bản chụp lúc tải, không tự đồng bộ với web; cần xem trạng thái web trước khi đến. Lịch khám, bác sĩ và cơ sở trong dữ liệu mẫu là mô phỏng.
-
-## 5. Email reset bằng SMTP
-
-PHPMailer đã kèm trong `includes/vendor/PHPMailer`. Sửa config.local, ví dụ cấu trúc:
+Sửa các mục tương ứng trong `config.local.php`. Ví dụ Groq, thay key/model bằng thông tin tài khoản của bạn:
 
 ```php
-'mail_transport' => 'smtp',
-'mail_from' => 'dia-chi-gui-cua-ban@example.com',
-'smtp_host' => 'smtp.nha-cung-cap-cua-ban',
-'smtp_port' => '587',
-'smtp_username' => 'tai-khoan-smtp',
-'smtp_password' => 'mat-khau-hoac-app-password-rieng',
-'smtp_security' => 'tls',
-'smtp_auth' => '1',
-'app_url' => 'https://ten-mien-cua-ban/duong-dan-web',
+"ai_provider" => "groq",
+"ai_api_key" => "KEY_CUA_BAN",
+"ai_model" => "openai/gpt-oss-120b",
+"ai_url" => "",
 ```
 
-Đây là giá trị minh họa, phải thay theo dịch vụ email của cậu. `tls` dùng STARTTLS, thường ở cổng 587; `ssl` dùng SMTPS, thường ở 465. Không tắt xác minh TLS. App password nếu có phụ thuộc nhà cung cấp.
+Lấy [Groq key](https://console.groq.com/keys) và chọn đúng ID model có quyền dùng trong Playground; model ví dụ không bảo đảm mọi tài khoản đều dùng được. `ai_url` trống dùng endpoint mặc định. `ai_model` trống dùng model trong code; gặp `404 model_not_found` thì chọn model khả dụng và điền rõ ID.
 
-Nếu dùng `mail_transport=mail`, PHP cần sendmail/SMTP được cấu hình; XAMPP mặc định thường chưa gửi được. Trang quên mật khẩu trả thông báo chung để không lộ email có tài khoản hay không. Email chứa mã 6 chữ số. Bấm Nhập mã đặt lại mật khẩu trong cùng trình duyệt, điền mã và mật khẩu mới. Mã chỉ dùng một lần trong 15 phút và cho tối đa 5 lần thử; database chỉ lưu bản băm có khóa. Chờ 5 phút trước khi xin mã thay thế. Đổi mật khẩu vô hiệu hóa phiên đăng nhập cũ.
+Dùng [Gemini key](https://aistudio.google.com/app/apikey): đổi provider thành `gemini`, điền key Gemini và đổi model tương ứng hoặc để `ai_model` trống. Không giữ model Groq khi chuyển provider.
 
-Bộ kiểm thử dùng SMTP giả lập trên localhost, không gửi thư thật. Nhóm cần tự thử hộp thư thật sau khi điền cấu hình. Không commit config.local hoặc mật khẩu.
+Dùng Ollama: đặt provider rỗng hoặc `ollama`, chạy `ollama pull qwen2.5:3b` và `ollama serve` trên máy PHP nếu dịch vụ chưa chạy. Chế độ này dùng `ollama_url`/`ollama_model`; cloud lỗi không tự chuyển sang Ollama. Đăng nhập lưu hội thoại trong DB, khách chỉ giữ tạm trong session.
 
-## 6. Chatbot Ollama
+## Email quên mật khẩu
 
-Trên máy chạy PHP:
+Ví dụ Gmail SMTP; thay các giá trị viết hoa trong cấu hình riêng:
 
-```sh
-ollama pull qwen2.5:3b
-ollama serve
+```php
+"mail_transport" => "smtp",
+"mail_from" => "EMAIL_GMAIL_CUA_BAN",
+"smtp_host" => "smtp.gmail.com",
+"smtp_port" => "587",
+"smtp_username" => "EMAIL_GMAIL_CUA_BAN",
+"smtp_password" => "MAT_KHAU_UNG_DUNG_GOOGLE",
+"smtp_security" => "tls",
+"smtp_auth" => "1",
 ```
 
-Nếu Ollama đã chạy nền thì không chạy thêm serve. Cấu hình `ollama_url` mặc định `http://127.0.0.1:11434/api/chat` và `ollama_model=qwen2.5:3b`. PHP gọi Ollama phía server; điện thoại không cần cài model. Máy yếu có thể phản hồi chậm; backend giới hạn thời gian chờ.
+Google cần xác minh hai bước và tài khoản được phép tạo mật khẩu ứng dụng; không dùng mật khẩu Gmail thường. SMTP khác dùng thông số nhà cung cấp. Giữ xác minh TLS; `mail_transport=mail` cần hệ thống gửi thư cấu hình riêng.
 
-Đăng nhập để lưu lịch sử theo tài khoản. Lịch sử chat có xem/tiếp tục/xóa. Khi Ollama không hoạt động, web báo chưa kết nối được; các chức năng khác vẫn sử dụng bình thường. Nội dung chatbot chỉ tham khảo và không được giới thiệu như công cụ chẩn đoán/kê đơn.
+Mã email có 6 số, nhập trong cùng trình duyệt đã yêu cầu, hạn 15 phút và tối đa 5 lần thử. Chờ 5 phút trước khi xin mã thay thế. Mã dùng một lần; đổi mật khẩu làm phiên cũ mất hiệu lực. Thông báo chung trên form không chứng minh thư đã tới hộp thư; kiểm tra cả spam.
 
-## 7. Tin RSS
+## Cách chạy khác
 
-Nguồn trong config mẫu là 3 nguồn tiếng Việt: Tuổi Trẻ Sức khỏe, Thanh Niên Sức khỏe và Sức khỏe & Đời sống. `config.local.php` là file riêng của từng máy và không được Git theo dõi; sau khi cập nhật source, người chạy cần tự sửa mảng `news_sources` trong config.local.php thành đúng 3 nguồn này nếu file local vẫn đang dùng cấu hình cũ. Mỗi lượt tối đa 3 nguồn. Endpoint nguồn phải trả XML qua HTTPS trực tiếp; redirect không được theo tự động. Cần curl + SimpleXML.
+- **PHP built-in:** tại thư mục ứng dụng chạy `php -S localhost:8001 -t . tools/router.php`, đặt `app_url=http://localhost:8001`; không cần Apache. Chỉ dùng để phát triển. `CHAY_WINDOWS.bat` ở gốc repo dùng cổng 8000; sửa đường dẫn PHP trong file nếu khác máy.
+- **Docker:** theo [DOCKER.md](../DOCKER.md). `.env` của Docker không tự được bản XAMPP đọc.
+- **Hosting:** cần PHP/MySQL, HTTPS và quyền ghi uploads. Apache cần cho phép `.htaccess`; [mẫu Nginx](docs/NGINX_EXAMPLE.conf) phải chỉnh root/socket/TLS theo máy thực tế.
 
-Cache trong thư mục tạm của PHP, 30–60 phút theo news_cache_ttl. Làm mới theo yêu cầu truy cập khi hết hạn, có khóa tránh nhiều request tải cùng lúc. Nếu nguồn lỗi, giữ tin cũ và báo trạng thái cũ. API `api/tin-tuc.php` chỉ trả cache/theo TTL, tham số refresh không bỏ qua giới hạn.
+## Nâng cấp và sao lưu
 
-Trang chủ trộn tin mới nhất; trang tin có tab bài viết nội bộ và tab RSS. Bài RSS mở website gốc, không nhập thành bài do nhóm sở hữu. Danh mục nội bộ không áp cho tin RSS. Nội dung tiêu đề và tóm tắt lấy từ feed gốc, không dịch máy hay sao chép toàn văn.
+Sao lưu DB, uploads và cấu hình riêng trước khi cập nhật code. Giữ nguyên `config.local.php` và uploads; chọn đúng DB rồi import `database/upgrade_final.sql`. Script có thể chạy lại và giữ lịch cũ; **không import lại schema cài mới vào DB có dữ liệu**. Chạy doctor, kiểm tra dữ liệu cũ và thử khôi phục backup vào DB thử riêng. Không đặt backup/bí mật trong Git hoặc thư mục public.
 
-## 8. Giao diện điện thoại và cài PWA
+## RSS, PWA và xử lý lỗi
 
-Thu nhỏ trình duyệt hoặc dùng điện thoại: giao diện tự đổi bố cục, có thanh điều hướng dưới. Để cài biểu tượng lên màn hình chính, xem `huong-dan-app.php`.
-
-- PWA cần HTTPS (hoặc localhost trên chính thiết bị đang chạy trình duyệt).
-- Điện thoại mở `http://IP-may-tinh:8000` qua LAN có thể xem responsive nhưng thường không cài PWA. Nếu demo LAN, PHP server phải bind địa chỉ LAN và firewall cho phép; chỉ mở trên mạng tin cậy, không dùng server phát triển để public Internet.
-- Chrome/Android: menu cài ứng dụng hoặc nút cài khi trình duyệt cho phép. iPhone/Safari: Chia sẻ → Thêm vào màn hình chính.
-- Manifest dùng đường dẫn tương đối, chạy được cả thư mục con trên Apache.
-- Service worker chỉ cache các file tĩnh trong danh sách rõ ràng. Không cache trang PHP, API, uploads hoặc tài khoản. Mất mạng hiển thị trang kết nối lại, không cho đặt lịch ngoại tuyến.
-- Khi sửa tài nguyên tĩnh đã cache cho lần phát hành sau, tăng phiên bản CACHE trong sw.js.
-
-## 9. Hosting, backup và nghiệm thu
-
-Hosting cần PHP/MySQL, HTTPS, các extension yêu cầu và quyền ghi uploads. Cấu hình app_url theo URL thật; dùng tài khoản DB riêng. Apache cần cho phép .htaccess; Nginx phải tự chặn config/includes/database/docs/tools và thực thi PHP trong uploads. Xem `docs/NGINX_EXAMPLE.conf` chỉ như mẫu để người quản trị điều chỉnh root/PHP socket.
-
-Backup gồm SQL database + uploads + config.local riêng tư. Khôi phục vào database thử riêng, sửa db_name trong một bản copy config, đăng nhập và đối chiếu dữ liệu. Không đặt file backup SQL trong thư mục public.
-
-Xem `docs/KIEM_TRA_FINAL.md`, `docs/DEMO.md` và `tests/README.md`. Nhóm tự làm PDF và chụp cả thanh địa chỉ theo yêu cầu môn học.
+- RSS dùng tối đa ba nguồn HTTPS trong `news_sources`, cache 30–60 phút và giữ cache cũ khi nguồn lỗi. Bản local dùng nguồn cũ thì tự cập nhật từ config mẫu. Tin mở tại báo gốc, không cần API key.
+- PWA cần HTTPS hoặc localhost trên chính thiết bị. HTTP qua IP LAN thường không cài được. Service Worker chỉ cache tĩnh, không lưu PHP/API/uploads; tăng phiên bản cache trong `sw.js` khi phát hành tài nguyên đã đổi.
+- DB lỗi: kiểm tra service, port, mật khẩu và đủ 16 bảng; dùng client tương thích server nếu gặp lỗi plugin xác thực.
+- AI lỗi: xem dòng `Chatbot provider=... HTTP=...` trong log PHP. `401` kiểm tra key, `404` kiểm tra model/endpoint, `429` kiểm tra hạn mức, `0` kiểm tra kết nối/CA. Không gửi key hoặc tắt TLS để xử lý.
+- Trước demo: chạy [tests](../tests/README.md) và [kịch bản demo](docs/DEMO.md). [Kết quả lưu trữ](docs/KIEM_TRA_FINAL.md) chỉ áp dụng phiên bản/môi trường ghi trong đó.

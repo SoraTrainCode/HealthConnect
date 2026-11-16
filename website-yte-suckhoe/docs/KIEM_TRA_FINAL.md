@@ -1,4 +1,6 @@
-# Kết quả kiểm tra bản hoàn thiện
+# Kết quả kiểm tra lưu trữ — 29–30/10/2026
+
+Tài liệu giữ bằng chứng của các phiên bản tại thời điểm bên dưới. Số liệu không xác nhận bản code hiện tại; chạy lại theo [hướng dẫn kiểm thử](../../tests/README.md) và [checklist nghiệm thu](DEMO.md#checklist-trước-khi-nộp). Luồng email dùng link/token và nguồn RSS được nhắc trong bản cũ; cấu hình hiện hành dùng mã email 6 số và ba nguồn tin tiếng Việt theo [hướng dẫn cài đặt](../HUONG_DAN.md).
 
 Ngày chốt: **29/10/2026**. Bản nền remote: `a4c67a73ff0b043eac4e99a3067b160cf5ffcaa2`. Môi trường chạy kiểm tra: PHP 8.3.6, MariaDB 10.11.14, Chromium headless. Dữ liệu giả lập nằm trong database riêng tên ngẫu nhiên, không dùng database của nhóm.
 
@@ -28,7 +30,7 @@ Nguồn CDC mặc định và endpoint WHO tham khảo đã được truy cập 
 - HTTPS hosting và cài PWA trên điện thoại thật; kiểm tra headless không chứng minh đã cài lên thiết bị hay được cửa hàng app duyệt.
 - Backup/restore trên bản sao dữ liệu nhóm, ảnh/PDF báo cáo và phần thuyết trình.
 
-Bộ test có thể chạy lại theo `tests/README.md`. Các tài liệu kiểm thử phiên bản trước trong docs là lịch sử, không cộng số lượng đó vào kết quả hiện tại.
+Bộ test có thể chạy lại theo [hướng dẫn kiểm thử](../../tests/README.md). Chỉ dùng số liệu lưu trữ cho đúng phiên bản và môi trường đã ghi.
 
 ## Cập nhật 30/10/2026 — RSS tiếng Việt và trang bác sĩ
 
