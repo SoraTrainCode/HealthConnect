@@ -10,9 +10,9 @@ function head(string $title): void
 function foot(): void
 {
  $p=url();$current=basename($_SERVER['SCRIPT_NAME']??'');
- ?></main><footer class="hc-footer"><div class="container footer-grid"><div><strong>HealthConnect</strong><p>Sổ tay sức khỏe & lịch hẹn của bạn.</p><small>Thông tin tham khảo, không thay thế chẩn đoán hoặc điều trị của bác sĩ.</small></div><div><a href="<?php echo $p; ?>huong-dan-app.php">Cài ứng dụng</a><a href="<?php echo $p; ?>quyen-rieng-tu.php">Dữ liệu & quyền riêng tư</a><a href="<?php echo $p; ?>lich-su-chat.php">Lịch sử trò chuyện</a><button type="button" id="install-app" class="btn btn-outline-brand" hidden>Cài HealthConnect</button></div></div></footer>
+ ?></main><footer class="hc-footer"><div class="container footer-grid"><div><strong>HealthConnect</strong><p>Sổ tay sức khỏe & lịch hẹn của bạn.</p><small>Thông tin tham khảo, không thay thế chẩn đoán hoặc điều trị của bác sĩ.</small></div><div><a href="<?php echo $p; ?>huong-dan-app.php">Cài ứng dụng</a><a href="<?php echo $p; ?>quyen-rieng-tu.php">Dữ liệu & quyền riêng tư</a><a href="<?php echo $p; ?>lich-su-tro-chuyen.php">Lịch sử trò chuyện</a><button type="button" id="install-app" class="btn btn-outline-brand" hidden>Cài HealthConnect</button></div></div></footer>
  <nav class="mobile-tabs" aria-label="Điều hướng điện thoại"><?php foreach(['index.php'=>['⌂','Trang chủ'],'suc-khoe.php'=>['♡','Sức khỏe'],'dat-lich.php'=>['▦','Lịch khám'],'tai-khoan.php'=>['○','Tài khoản']] as $file=>[$icon,$label]): ?><a href="<?php echo $p.$file; ?>" <?php echo $current===$file?'aria-current="page"':''; ?>><span aria-hidden="true"><?php echo $icon; ?></span><?php echo $label; ?></a><?php endforeach; ?></nav>
- <script src="<?php echo $p; ?>assets/vendor/bootstrap.bundle.min.js"></script><script>window.HC_BASE=<?php echo json_encode($p); ?>;</script><script src="<?php echo $p; ?>assets/js/app.js" defer></script><script src="<?php echo $p; ?>assets/js/chatbot-php.js" defer></script></body></html><?php
+ <script src="<?php echo $p; ?>assets/vendor/bootstrap.bundle.min.js"></script><script>window.HC_BASE=<?php echo json_encode($p); ?>;</script><script src="<?php echo $p; ?>assets/js/app.js" defer></script><script src="<?php echo $p; ?>assets/js/tro-ly.js" defer></script></body></html><?php
 }
 function input(
     string $name,

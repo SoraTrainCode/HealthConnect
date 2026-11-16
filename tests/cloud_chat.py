@@ -125,7 +125,7 @@ def guest_api(web, folder, overrides):
 
 
 def ask(session, base, headers, question=QUESTION):
-    return session.post(base + "api/chat.php", json={"message": question}, headers=headers, timeout=10)
+    return session.post(base + "api/tro-ly.php", json={"message": question}, headers=headers, timeout=10)
 
 
 def run():
@@ -235,7 +235,7 @@ def run():
             mock_reply(mock, {"choices": [{"message": {"content": "Guest history response"}}]})
             with guest_api(web, folder, {"ai_provider": "groq", "ai_api_key": TEST_KEY, "ai_url": endpoint}) as args:
                 session, base, headers, _log = args
-                check(session.get(base + "api/chat.php", timeout=10).status_code == 405, "GET remains HTTP 405")
+                check(session.get(base + "api/tro-ly.php", timeout=10).status_code == 405, "GET remains HTTP 405")
                 check(ask(session, base, {}).status_code == 403, "missing CSRF remains HTTP 403")
                 check(ask(session, base, headers, "").status_code == 422, "empty input remains HTTP 422")
                 check(ask(session, base, headers, "a" * 2001).status_code == 422, "overlong input remains HTTP 422")
