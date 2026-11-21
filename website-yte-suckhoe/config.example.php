@@ -1,4 +1,7 @@
 <?php
+// TÀI KHOẢN ADMIN DEMO (cho giảng viên đăng nhập kiểm tra):
+//   Email: vuductrong098@gmail.com — Mật khẩu: 123123123
+//   (Tài khoản phải được tạo trước trong database: đăng ký trên web rồi nâng quyền admin trong bảng users.)
 // Sao chép thành config.local.php rồi sửa theo máy bạn. Không đưa config.local.php lên Git.
 return [
     "db_host" => "127.0.0.1",
