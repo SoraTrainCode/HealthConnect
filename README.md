@@ -155,4 +155,7 @@ Bản đang chạy tại **https://healthconnect172.rf.gd** (InfinityFree, Apach
 - **Lê Bá Khánh Bình** — MSSV 52400172
 - **Vũ Đức Trọng** — MSSV 52400249
 
+- **TÀI KHOẢN ADMIN DEMO (cho giảng viên đăng nhập kiểm tra):**
+- **Email: vuductrong098@gmail.com — Mật khẩu: 123123123**
+
 Repo quản lý bằng Git/GitHub theo nhánh và Pull Request, không force-push, không commit `config.local.php` hay khóa API lên kho mã nguồn.
